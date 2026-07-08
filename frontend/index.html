@@ -1,0 +1,3310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GT_agent - 面试题学习平台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ========== 简洁白底配色系统 ========== */
+        :root {
+            --bg: #FAFAFA;
+            --surface: #FFFFFF;
+            --surface-muted: #F5F5F5;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --text-tertiary: #9CA3AF;
+            --border: #E5E7EB;
+            --border-strong: #D1D5DB;
+            --accent: #4F46E5;
+            --accent-hover: #4338CA;
+            --accent-light: #EEF2FF;
+            --accent-text: #3730A3;
+            --success: #059669;
+            --success-light: #ECFDF5;
+            --danger: #DC2626;
+            --danger-light: #FEF2F2;
+            --warning: #D97706;
+            --warning-light: #FFFBEB;
+            --font-body: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-pill: 9999px;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --radius-sm: 6px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
+        }
+
+        ::selection { background: var(--accent-light); color: var(--accent-text); }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+        /* ========== 登录页 ========== */
+        #loginScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            background-image: radial-gradient(circle at 20% 20%, rgba(79,70,229,0.04) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 80%, rgba(79,70,229,0.03) 0%, transparent 50%);
+        }
+        .login-card {
+            position: relative;
+            width: 400px;
+            max-width: 92vw;
+            padding: 40px 36px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+        }
+        .login-card h1 {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+        .login-card .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 32px;
+        }
+        .login-tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 24px;
+            padding: 3px;
+            background: var(--surface-muted);
+            border-radius: var(--radius-md);
+        }
+        .login-tab {
+            flex: 1;
+            padding: 9px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+            font-family: var(--font-body);
+            font-weight: 500;
+        }
+        .login-tab.active {
+            color: var(--text-primary);
+            background: var(--surface);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ========== 表单元素 ========== */
+        .form-group { margin-bottom: 16px; }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+        }
+        .form-textarea { resize: vertical; min-height: 88px; line-height: 1.6; }
+        .form-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+            cursor: pointer;
+        }
+        .form-select option { background: var(--surface); }
+
+        /* ========== 按钮 ========== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 18px;
+            font-family: var(--font-body);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            letter-spacing: 0;
+            line-height: 1.4;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #FFFFFF;
+        }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-ghost {
+            background: var(--surface);
+            color: var(--text-primary);
+            border-color: var(--border);
+        }
+        .btn-ghost:hover { background: var(--surface-muted); border-color: var(--border-strong); }
+        .btn-danger {
+            background: var(--surface);
+            color: var(--danger);
+            border-color: var(--border);
+        }
+        .btn-danger:hover { background: var(--danger-light); border-color: var(--danger); }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn-block { width: 100%; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ========== 主布局 ========== */
+        #app { min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* ========== 顶部导航栏 ========== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 32px;
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: var(--text-primary);
+        }
+        .nav-brand .brand-mark {
+            width: 26px; height: 26px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--accent);
+            border-radius: 6px;
+        }
+        .nav-items { display: flex; gap: 2px; }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            transition: background 0.15s, color 0.15s;
+            font-family: var(--font-body);
+            font-weight: 500;
+        }
+        .nav-item:hover { background: var(--surface-muted); color: var(--text-primary); }
+        .nav-item.active { background: var(--accent-light); color: var(--accent-text); }
+        .nav-item svg { width: 16px; height: 16px; }
+        .nav-user { display: flex; align-items: center; gap: 12px; }
+        .user-name { font-size: 13px; color: var(--text-secondary); }
+        .logout-btn {
+            padding: 6px 12px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 12px;
+            font-family: var(--font-body);
+            transition: all 0.2s;
+        }
+        .logout-btn:hover { color: var(--danger); border-color: var(--danger); }
+
+        /* ========== 主内容 ========== */
+        .main-content {
+            flex: 1;
+            padding: 24px 32px 64px;
+            max-width: 1320px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.4px;
+            margin-bottom: 2px;
+        }
+        .page-subtitle { font-size: 12px; color: var(--text-secondary); }
+
+        /* ========== 题目提取 ========== */
+        .upload-area { margin-bottom: 12px; }
+        .upload-area textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 13px;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .upload-area textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+        }
+        .extract-result { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+
+        /* ========== 卡片（基础） ========== */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .card.confused-card {
+            border-color: var(--warning);
+            background: var(--warning-light);
+        }
+
+        /* ========== 题卡翻转 - 不使用hover，只点击 ========== */
+        .flip-card { perspective: 1200px; cursor: pointer; }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+            transform-style: preserve-3d;
+            display: grid;
+            grid-template-columns: 1fr;
+        }
+        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back {
+            grid-row: 1;
+            grid-column: 1;
+            width: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        .flip-card-back { transform: rotateY(180deg); background: var(--surface-muted); }
+        .flip-hint {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            text-align: center;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+            margin-top: auto;
+            letter-spacing: 0.3px;
+        }
+
+        .question-card { display: flex; flex-direction: column; gap: 12px; }
+        .question-card .q-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .question-card .q-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+        .question-card .q-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+        }
+        .question-card .q-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+        .answer-text {
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            max-height: 320px;
+            overflow-y: auto;
+            padding: 4px 0;
+        }
+        .num-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px; height: 24px;
+            background: var(--accent);
+            color: #FFFFFF;
+            font-weight: 600;
+            font-size: 11px;
+            border-radius: 50%;
+            font-family: var(--font-mono);
+            flex-shrink: 0;
+        }
+
+        /* ========== 标签 ========== */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            font-size: 11px;
+            border-radius: var(--radius-pill);
+            background: var(--surface-muted);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            letter-spacing: 0;
+            font-weight: 500;
+        }
+        .tag.tag-bagua { background: var(--surface-muted); color: #374151; border-color: var(--border); }
+        .tag.tag-project { background: var(--accent-light); color: var(--accent-text); border-color: #C7D2FE; }
+        .tag.tag-algorithm { background: var(--success-light); color: #047857; border-color: #A7F3D0; }
+        .tag.tag-confused { background: var(--warning-light); color: var(--warning); border-color: #FCD34D; }
+        .tag.tag-answer { background: var(--accent); color: #FFFFFF; border-color: var(--accent); }
+        .tag.tag-generated { background: #EFF6FF; color: #2563EB; border-color: #BFDBFE; }
+        .tag.tag-library { background: var(--surface-muted); color: var(--text-secondary); }
+
+        /* ========== 星级评分 ========== */
+        .stars { display: inline-flex; gap: 1px; }
+        .star { color: var(--border-strong); font-size: 13px; }
+        .star.filled { color: var(--warning); }
+
+        /* ========== Tab 切换 ========== */
+        .tab-btn {
+            padding: 6px 14px;
+            font-size: 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.15s, color 0.15s;
+        }
+        .tab-btn:hover { color: var(--text-primary); }
+        .tab-btn.active {
+            background: var(--surface);
+            color: var(--text-primary);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        /* ========== 图标按钮 ========== */
+        .icon-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 10px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 12px;
+            font-family: var(--font-body);
+            transition: all 0.15s;
+        }
+        .icon-btn:hover { background: var(--surface-muted); color: var(--text-primary); border-color: var(--border-strong); }
+        .icon-btn.danger:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-light); }
+        .icon-btn svg { width: 13px; height: 13px; }
+        .icon-btn.starred { color: var(--warning); border-color: #FCD34D; background: var(--warning-light); }
+        .icon-btn.star-btn:hover { color: var(--warning); border-color: #FCD34D; background: var(--warning-light); }
+
+        /* 星标置顶卡片视觉提示 */
+        .flip-card.is-starred .flip-card-front,
+        .flip-card.is-starred .flip-card-back {
+            border-color: #FCD34D;
+            box-shadow: 0 1px 2px rgba(217,119,6,0.08), 0 0 0 1px rgba(252,211,77,0.4);
+        }
+        .tag.tag-starred {
+            background: var(--warning-light);
+            color: var(--warning);
+            border-color: #FCD34D;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .star-pin-icon { color: var(--warning); display: inline-flex; align-items: center; }
+
+        /* ========== 模拟面试 ========== */
+        .interview-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 20px;
+            min-height: 600px;
+        }
+        .interview-sidebar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 70vh;
+            overflow: hidden;
+        }
+        .interview-sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .interview-sidebar-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .interview-session-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .interview-session-item {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            background: var(--surface);
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .interview-session-item:hover { border-color: var(--border-strong); background: var(--surface-muted); }
+        .interview-session-item.active { border-color: var(--accent); background: var(--accent-light); }
+        .interview-session-item .sess-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .interview-session-item .sess-meta {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .interview-session-item .sess-status {
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: var(--radius-pill);
+            background: var(--success-light);
+            color: var(--success);
+        }
+        .interview-session-item .sess-status.ended {
+            background: var(--surface-muted);
+            color: var(--text-tertiary);
+        }
+        .interview-session-item .sess-del {
+            margin-left: auto;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .interview-session-item .sess-del:hover { color: var(--danger); }
+
+        .interview-main {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+            max-height: 70vh;
+            overflow: hidden;
+        }
+        .interview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface-muted);
+        }
+        .interview-header-info { display: flex; flex-direction: column; gap: 2px; }
+        .interview-header-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        .interview-header-sub { font-size: 11px; color: var(--text-tertiary); }
+
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: var(--bg);
+        }
+        .chat-msg {
+            display: flex;
+            gap: 10px;
+            max-width: 85%;
+        }
+        .chat-msg.interviewer { align-self: flex-start; }
+        .chat-msg.candidate { align-self: flex-end; flex-direction: row-reverse; }
+        .chat-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .chat-msg.interviewer .chat-avatar {
+            background: var(--accent);
+            color: #FFFFFF;
+        }
+        .chat-msg.candidate .chat-avatar {
+            background: var(--surface-muted);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        .chat-bubble {
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .chat-msg.interviewer .chat-bubble {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top-left-radius: 4px;
+        }
+        .chat-msg.candidate .chat-bubble {
+            background: var(--accent);
+            color: #FFFFFF;
+            border-top-right-radius: 4px;
+        }
+        .chat-msg .chat-meta {
+            font-size: 10px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+        .chat-typing {
+            align-self: flex-start;
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            border-top-left-radius: 4px;
+        }
+        .chat-typing span {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--text-tertiary);
+            animation: typing 1.2s infinite;
+        }
+        .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+        .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+            30% { opacity: 1; transform: translateY(-3px); }
+        }
+
+        .chat-input-area {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-family: var(--font-body);
+            font-size: 13px;
+            color: var(--text-primary);
+            resize: none;
+            min-height: 42px;
+            max-height: 120px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            line-height: 1.5;
+        }
+        .chat-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+        }
+        .chat-input:disabled { background: var(--surface-muted); cursor: not-allowed; }
+        .chat-send-btn {
+            padding: 10px 18px;
+            background: var(--accent);
+            color: #FFFFFF;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-body);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .chat-send-btn:hover:not(:disabled) { background: var(--accent-hover); }
+        .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .chat-end-btn {
+            padding: 8px 14px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chat-end-btn:hover { color: var(--danger); border-color: var(--danger); }
+
+        .interview-start-card {
+            max-width: 460px;
+            margin: 24px auto;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px 28px;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+        }
+        .interview-start-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+        .interview-start-card .desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 18px;
+        }
+        .interview-start-card .form-group { text-align: left; }
+        .interview-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-tertiary);
+            font-size: 13px;
+        }
+        @media (max-width: 900px) {
+            .interview-layout { grid-template-columns: 1fr; }
+            .interview-sidebar { max-height: 200px; }
+        }
+
+        /* ========== 题库管理 ========== */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .filter-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+        .filter-item { display: flex; flex-direction: column; gap: 3px; }
+        .filter-item label { font-size: 10px; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.2px; }
+        .filter-item select {
+            padding: 6px 26px 6px 10px;
+            font-size: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .filter-item select:focus { border-color: var(--accent); }
+        .stats-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 14px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .stat-num { color: var(--text-primary); font-weight: 600; font-family: var(--font-mono); }
+
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 14px;
+        }
+
+        /* ========== 题库行列表（紧凑可展开） ========== */
+        .q-list { display: flex; flex-direction: column; gap: 6px; }
+        .q-row {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .q-row:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+        .q-row.is-starred { border-left: 3px solid var(--warning); }
+        .q-row.is-confused { border-left: 3px solid var(--warning); background: var(--warning-light); }
+        .q-row.expanded { border-color: var(--accent); box-shadow: 0 2px 8px rgba(79,70,229,0.08); }
+
+        .q-row-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .q-row-tags {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+        .q-row-content {
+            flex: 1;
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 1.5;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .q-row-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .q-row-stars { display: inline-flex; gap: 1px; font-size: 11px; }
+        .q-row-stars .star { font-size: 11px; }
+        .q-row-toggle {
+            color: var(--text-tertiary);
+            transition: transform 0.2s;
+            display: inline-flex;
+        }
+        .q-row.expanded .q-row-toggle { transform: rotate(90deg); }
+
+        .q-row-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .q-row-actions .icon-btn { padding: 4px 8px; font-size: 11px; }
+        .q-row-actions .icon-btn svg { width: 12px; height: 12px; }
+
+        .q-row-body {
+            display: none;
+            padding: 0 14px 14px;
+            border-top: 1px solid var(--border);
+            background: var(--surface-muted);
+        }
+        .q-row.expanded .q-row-body { display: block; animation: fadeIn 0.2s ease; }
+        .q-row-answer {
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            padding: 12px 0 8px;
+        }
+        .q-row-empty {
+            color: var(--text-tertiary);
+            font-size: 13px;
+            padding: 12px 0;
+        }
+        .q-row-body-actions {
+            display: flex;
+            gap: 6px;
+            padding-top: 4px;
+        }
+
+        /* ========== 项目卡片 ========== */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 12px;
+        }
+        .project-card {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+        }
+        .project-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+        .project-card .p-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            letter-spacing: -0.2px;
+        }
+        .project-card .p-type { margin-bottom: 2px; }
+        .project-card .p-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.55;
+            margin-bottom: 6px;
+            max-height: 66px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        .project-card .p-tech { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
+        .project-card .p-actions {
+            display: flex; gap: 6px; margin-top: auto;
+            padding-top: 8px; border-top: 1px solid var(--border);
+        }
+
+        /* ========== 出题模式卡片 ========== */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .mode-card {
+            padding: 16px 14px;
+            text-align: center;
+            cursor: pointer;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            transition: border-color 0.2s, background 0.2s, transform 0.15s;
+        }
+        .mode-card:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+        .mode-card.active {
+            background: var(--accent-light);
+            border-color: var(--accent);
+        }
+        .mode-card svg { width: 24px; height: 24px; margin-bottom: 6px; color: var(--accent); }
+        .mode-card .m-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+        .mode-card .m-desc { font-size: 11px; color: var(--text-secondary); }
+
+        /* ========== 试卷展示 ========== */
+        .exam-paper {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+        .exam-paper h3 {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+        .exam-paper .paper-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+        }
+        .exam-q {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .exam-q:last-child { border-bottom: none; }
+        .exam-q .eq-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px; height: 22px;
+            background: var(--accent);
+            color: #FFFFFF;
+            font-weight: 600;
+            font-size: 11px;
+            border-radius: 50%;
+            margin-right: 8px;
+            font-family: var(--font-mono);
+        }
+        /* ========== 复习模式 ========== */
+        .review-progress {
+            height: 4px;
+            background: var(--surface-muted);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+        .review-progress-bar {
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.5s ease;
+        }
+        .review-card { max-width: 720px; margin: 0 auto; padding: 24px; }
+        .review-card .r-question {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+        .review-card .r-tags { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+        .review-card .r-answer-area {
+            margin-top: 14px;
+            padding: 12px 14px;
+            background: var(--surface-muted);
+            border-left: 3px solid var(--accent);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            display: none;
+        }
+        .review-card .r-answer-area.show { display: block; animation: fadeIn 0.3s ease; }
+
+        .score-feedback {
+            display: none;
+            margin-top: 16px;
+            padding: 14px;
+            border-radius: var(--radius-md);
+            border: 1px solid;
+        }
+        .score-feedback.show { display: block; animation: fadeIn 0.3s ease; }
+        .score-feedback.good { background: var(--success-light); border-color: #A7F3D0; }
+        .score-feedback.bad { background: var(--warning-light); border-color: #FCD34D; }
+
+        /* ========== Modal ========== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(17,24,39,0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            width: 480px;
+            max-width: 95vw;
+            max-height: 88vh;
+            overflow-y: auto;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 22px 24px;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.25s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .modal-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 22px;
+            cursor: pointer;
+            width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+            line-height: 1;
+        }
+        .modal-close:hover { color: var(--text-primary); background: var(--surface-muted); }
+        .modal-tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 20px;
+            padding: 3px;
+            background: var(--surface-muted);
+            border-radius: var(--radius-md);
+        }
+        .modal-tab {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+            border: none;
+            background: transparent;
+            font-family: var(--font-body);
+            font-weight: 500;
+        }
+        .modal-tab.active {
+            color: var(--text-primary);
+            background: var(--surface);
+            box-shadow: var(--shadow-sm);
+        }
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal .form-group { margin-bottom: 12px; }
+
+        /* ========== Loading ========== */
+        .loading-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 32px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+        .spinner {
+            width: 28px; height: 28px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ========== 空状态 ========== */
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text-tertiary);
+        }
+        .empty-state svg { width: 40px; height: 40px; margin-bottom: 10px; opacity: 0.35; }
+        .empty-state p { font-size: 13px; }
+
+        /* ========== Toast ========== */
+        #toast {
+            position: fixed;
+            top: 70px; right: 24px;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast-item {
+            padding: 10px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 13px;
+            box-shadow: var(--shadow-lg);
+            animation: slideInRight 0.25s ease;
+            max-width: 340px;
+        }
+        .toast-item.success { border-left-color: var(--success); }
+        .toast-item.error { border-left-color: var(--danger); }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* ========== 响应式 ========== */
+        @media (max-width: 900px) {
+            .navbar { padding: 10px 16px; flex-wrap: wrap; gap: 8px; }
+            .nav-items { order: 3; width: 100%; overflow-x: auto; }
+            .nav-item { padding: 6px 10px; font-size: 12px; white-space: nowrap; }
+            .nav-item span { display: none; }
+            .main-content { padding: 20px 16px 60px; }
+            .page-title { font-size: 22px; }
+            .mode-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .question-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== 登录页 ========== -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <h1>GT_agent</h1>
+            <div class="subtitle">面试题学习平台</div>
+            <div class="login-tabs">
+                <button class="login-tab active" data-tab="login">登录</button>
+                <button class="login-tab" data-tab="register">注册</button>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" class="form-input" id="loginUsername" required placeholder="111">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="loginPassword" required placeholder="111">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">登 录</button>
+            </form>
+            <form id="registerForm" style="display:none;">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" class="form-input" id="regUsername" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">邮箱</label>
+                    <input type="email" class="form-input" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="regPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">注 册</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== 主应用 ========== -->
+    <div id="app" style="display:none;">
+        <nav class="navbar">
+            <div class="nav-brand">
+                <div class="brand-mark">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                </div>
+                <span>GT_agent</span>
+            </div>
+            <div class="nav-items">
+                <button class="nav-item active" data-page="extract">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <span>题目提取</span>
+                </button>
+                <button class="nav-item" data-page="library">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    <span>题库管理</span>
+                </button>
+                <button class="nav-item" data-page="projects">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    <span>项目管理</span>
+                </button>
+                <button class="nav-item" data-page="exam">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <span>智能出题</span>
+                </button>
+                <button class="nav-item" data-page="review">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                    <span>复习模式</span>
+                </button>
+                <button class="nav-item" data-page="interview">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>模拟面试</span>
+                </button>
+            </div>
+            <div class="nav-user">
+                <span class="user-name" id="navUserName"></span>
+                <button class="logout-btn" id="logoutBtn" style="display:none;">退出</button>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <!-- ========== 页面1：题目提取 ========== -->
+            <div class="page active" id="page-extract">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">题目提取</h1>
+                        <div class="page-subtitle">批量识题或单题问答，自动整理入题库</div>
+                    </div>
+                    <div class="tab-group" style="display:flex; gap:2px; background:var(--surface-muted); padding:3px; border-radius:var(--radius-md);">
+                        <button class="tab-btn active" data-tab="extract-batch" onclick="switchExtractTab('batch')">批量识题</button>
+                        <button class="tab-btn" data-tab="extract-solve" onclick="switchExtractTab('solve')">解题问答</button>
+                    </div>
+                </div>
+
+                <!-- 批量识题模式 -->
+                <div id="extractBatchPane">
+                <div class="upload-area">
+                    <textarea id="extractText" placeholder="在此粘贴面经文本，或直接 Ctrl+V 粘贴截图（自动 OCR 提取文字）...
+
+例如：
+面试官：你说一下Redis的持久化机制？
+答：RDB和AOF两种...
+
+面试官：MySQL索引底层数据结构是什么？
+答：B+树..."></textarea>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+                    <button class="btn btn-ghost" id="ocrBtn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        从图片提取文字
+                    </button>
+                    <input type="file" id="ocrFileInput" accept="image/*" style="display:none;">
+                </div>
+                <button class="btn btn-primary" id="extractBtn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    开始解析
+                </button>
+                <div id="extractLoading" class="loading-wrap" style="display:none;">
+                    <div class="spinner"></div>
+                    <div>识题agent正在提取并补全题目...</div>
+                </div>
+                <div id="extractResult" class="extract-result"></div>
+                </div>
+
+                <!-- 解题问答模式 -->
+                <div id="extractSolvePane" style="display:none;">
+                    <div class="card" style="display:flex; flex-direction:column; height: calc(100vh - 200px); min-height: 480px; padding:0; overflow:hidden;">
+                        <div style="padding:14px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:14px; font-weight:600; color:var(--text-primary);">解题助手</div>
+                                <div style="font-size:11px; color:var(--text-tertiary); margin-top:2px;">提问后自动整理为标准题并存入题库（高权重）</div>
+                            </div>
+                            <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-secondary); cursor:pointer;">
+                                <input type="checkbox" id="autoSaveSolve" checked>
+                                自动入库
+                            </label>
+                        </div>
+                        <div class="chat-box" id="solveChatBox" style="flex:1; padding:16px;">
+                            <div style="text-align:center; color:var(--text-tertiary); font-size:12px; padding:30px 0;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="margin-bottom:10px; opacity:0.4;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                <p>有问题直接问，解答后自动整理为标准面试题</p>
+                            </div>
+                        </div>
+                        <div class="chat-input-area" style="border-top:1px solid var(--border); padding:12px;">
+                            <textarea class="chat-input" id="solveInput" placeholder="输入你的问题，比如：Redis的缓存穿透是什么？" rows="1" style="width:100%;"></textarea>
+                            <button class="chat-send-btn" id="solveSendBtn">发送</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== 页面2：题库管理 ========== -->
+            <div class="page" id="page-library">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">题库管理</h1>
+                        <div class="page-subtitle">浏览、筛选、编辑、新增题目</div>
+                    </div>
+                </div>
+                <div class="toolbar">
+                    <div class="filter-group">
+                        <div class="filter-item">
+                            <label>类型</label>
+                            <select id="filterType">
+                                <option value="">全部</option>
+                                <option value="bagua">八股题</option>
+                                <option value="project">项目题</option>
+                                <option value="algorithm">算法题</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>分类</label>
+                            <select id="filterCategory">
+                                <option value="">全部</option>
+                                <option value="redis">redis</option>
+                                <option value="mysql">mysql</option>
+                                <option value="java">java</option>
+                                <option value="multithreading">multithreading</option>
+                                <option value="collection">collection</option>
+                                <option value="network">network</option>
+                                <option value="os">os</option>
+                                <option value="distributed">distributed</option>
+                                <option value="spring">spring</option>
+                                <option value="design_pattern">design_pattern</option>
+                                <option value="project">project</option>
+                                <option value="algorithm">algorithm</option>
+                                <option value="other">other</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>难度</label>
+                            <select id="filterDifficulty">
+                                <option value="">全部</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-ghost btn-sm" id="resetFilterBtn">重置</button>
+                    </div>
+                    <button class="btn btn-primary" id="addQuestionBtn">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        新增题目
+                    </button>
+                </div>
+                <div class="stats-bar">
+                    <div>总题数：<span class="stat-num" id="totalStat">0</span></div>
+                    <div>筛选结果：<span class="stat-num" id="filteredStat">0</span></div>
+                </div>
+                <div id="libraryLoading" class="loading-wrap" style="display:none;">
+                    <div class="spinner"></div>
+                    <div>加载题库中...</div>
+                </div>
+                <div id="questionGrid" class="q-list"></div>
+                <div id="libraryEmpty" class="empty-state" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    <p>题库暂无题目，去"题目提取"页上传面经或手动新增吧</p>
+                </div>
+            </div>
+
+            <!-- ========== 页面3：项目管理 ========== -->
+            <div class="page" id="page-projects">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">项目管理</h1>
+                        <div class="page-subtitle">智能识别或手动添加项目</div>
+                    </div>
+                    <button class="btn btn-primary" id="addProjectBtn">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        添加项目
+                    </button>
+                </div>
+                <div id="projectLoading" class="loading-wrap" style="display:none;">
+                    <div class="spinner"></div>
+                    <div>加载项目中...</div>
+                </div>
+                <div id="projectGrid" class="project-grid"></div>
+                <div id="projectEmpty" class="empty-state" style="display:none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    <p>暂无项目，点击"添加项目"开始</p>
+                </div>
+            </div>
+
+            <!-- ========== 页面4：智能出题 ========== -->
+            <div class="page" id="page-exam">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">智能出题</h1>
+                        <div class="page-subtitle">AI根据项目和主题生成递进式面试题，含答案</div>
+                    </div>
+                </div>
+                <div class="mode-grid">
+                    <div class="mode-card active" data-mode="bagua">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                        <div class="m-title">八股题</div>
+                        <div class="m-desc">基础知识考查</div>
+                    </div>
+                    <div class="mode-card" data-mode="project">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                        <div class="m-title">项目题</div>
+                        <div class="m-desc">项目深度挖掘</div>
+                    </div>
+                    <div class="mode-card" data-mode="mixed">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        <div class="m-title">混合模式</div>
+                        <div class="m-desc">综合能力考核</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:12px; align-items:flex-end; margin-bottom:16px; flex-wrap:wrap;">
+                    <div class="filter-item">
+                        <label>题目数量</label>
+                        <select id="examCount">
+                            <option value="5">5 题</option>
+                            <option value="8" selected>8 题</option>
+                            <option value="10">10 题</option>
+                            <option value="15">15 题</option>
+                        </select>
+                    </div>
+                    <div class="filter-item" id="projectSelectWrap" style="display:none;">
+                        <label>关联项目</label>
+                        <select id="examProject"><option value="">选择项目</option></select>
+                    </div>
+                    <button class="btn btn-primary" id="generateExamBtn">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        生成试卷
+                    </button>
+                </div>
+                <div id="examLoading" class="loading-wrap" style="display:none;">
+                    <div class="spinner"></div>
+                    <div>AI正在根据项目和主题生成递进式题目...</div>
+                </div>
+                <div id="examPaper"></div>
+            </div>
+
+            <!-- ========== 页面5：复习模式 ========== -->
+            <div class="page" id="page-review">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">复习模式</h1>
+                        <div class="page-subtitle">对话式复习，AI 判答后出下一题</div>
+                    </div>
+                </div>
+                <!-- 开始复习卡片 -->
+                <div id="reviewStart" style="max-width:460px; margin:0 auto;">
+                    <div class="card" style="text-align:center; padding:28px 24px;">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="margin-bottom:12px; color:var(--accent);"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                        <h3 style="font-size:18px; font-weight:600; margin-bottom:6px; color:var(--text-primary);">开始复习</h3>
+                        <p style="color:var(--text-secondary); font-size:12px; margin-bottom:16px;">系统根据你的复习历史智能推送题目，对话式作答</p>
+                        <div class="filter-item" style="margin-bottom:16px; max-width:180px; margin-left:auto; margin-right:auto;">
+                            <label>复习题数</label>
+                            <select id="reviewCount">
+                                <option value="5">5 题</option>
+                                <option value="10" selected>10 题</option>
+                                <option value="15">15 题</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" id="startReviewBtn">开始复习</button>
+                    </div>
+                </div>
+                <!-- 对话式复习区 -->
+                <div id="reviewSession" style="display:none;">
+                    <div class="review-progress">
+                        <div class="review-progress-bar" id="reviewProgressBar" style="width:0%;"></div>
+                    </div>
+                    <div style="text-align:center; margin-bottom:16px; font-size:12px; color:var(--text-secondary);">
+                        进度：<span style="color:var(--text-primary); font-weight:600;" id="reviewProgressText">0 / 0</span>
+                    </div>
+                    <div class="interview-layout" style="height:calc(100vh - 280px); min-height:420px;">
+                        <div class="interview-main">
+                            <div class="interview-header">
+                                <div class="interview-header-info">
+                                    <div class="interview-header-title">复习对话</div>
+                                    <div class="interview-header-sub" id="reviewSub">AI 评估你的回答并出下一题</div>
+                                </div>
+                                <button class="chat-end-btn" id="endReviewBtn">结束复习</button>
+                            </div>
+                            <div class="chat-box" id="reviewChatBox"></div>
+                            <div class="chat-input-area">
+                                <textarea class="chat-input" id="reviewChatInput" placeholder="输入你的回答...（Shift+Enter 换行，Enter 发送）" rows="1"></textarea>
+                                <button class="chat-send-btn" id="reviewChatSendBtn">发送</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="reviewLoading" class="loading-wrap" style="display:none;">
+                    <div class="spinner"></div>
+                    <div>加载中...</div>
+                </div>
+            </div>
+
+            <!-- ========== 页面6：模拟面试 ========== -->
+            <div class="page" id="page-interview">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">模拟面试</h1>
+                        <div class="page-subtitle">AI 面试官基于你的项目进行 1 对 1 对话式面试</div>
+                    </div>
+                    <button class="btn btn-primary" id="newInterviewBtn">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        新建面试
+                    </button>
+                </div>
+
+                <!-- 面试布局：左侧历史会话 + 右侧（开始卡片/对话区） -->
+                <div id="interviewLayout" class="interview-layout">
+                    <div class="interview-sidebar">
+                        <div class="interview-sidebar-header">
+                            <span class="interview-sidebar-title">历史会话</span>
+                            <button class="btn btn-ghost btn-sm" id="backToStartBtn" title="新建面试">+ 新建</button>
+                        </div>
+                        <div class="interview-session-list" id="interviewSessionList"></div>
+                    </div>
+                    <div class="interview-main">
+                        <!-- 开始面试卡片（默认显示） -->
+                        <div id="interviewStartCard" class="interview-start-card" style="margin:0; border:none; box-shadow:none; padding:32px 20px;">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="margin-bottom:12px; color:var(--accent);"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            <h3>开始一场模拟面试</h3>
+                            <p class="desc">选择你的项目，面试官将围绕项目展开递进式提问</p>
+                            <div class="form-group">
+                                <label class="form-label">选择项目（可选，不选则通用面试）</label>
+                                <select class="form-select" id="interviewProject">
+                                    <option value="">通用后端面试</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">面试岗位</label>
+                                <select class="form-select" id="interviewPosition">
+                                    <option value="后端开发">后端开发</option>
+                                    <option value="Java开发">Java开发</option>
+                                    <option value="前端开发">前端开发</option>
+                                    <option value="全栈开发">全栈开发</option>
+                                    <option value="算法工程师">算法工程师</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary btn-block" id="startInterviewBtn" style="margin-top:8px;">开始面试</button>
+                        </div>
+
+                        <!-- 对话区（开始面试后显示） -->
+                        <div id="interviewChatArea" style="display:none; flex:1; flex-direction:column; min-height:0;">
+                            <div class="interview-header">
+                                <div class="interview-header-info">
+                                    <div class="interview-header-title" id="interviewTitle">模拟面试</div>
+                                    <div class="interview-header-sub" id="interviewSub">面试进行中</div>
+                                </div>
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <button class="chat-end-btn btn-ghost" id="extractInterviewBtn" style="display:none;" title="提取问题到题库">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                        提取题目
+                                    </button>
+                                    <button class="chat-end-btn" id="endInterviewBtn">结束面试</button>
+                                </div>
+                            </div>
+                            <div class="chat-box" id="chatBox"></div>
+                            <div class="chat-input-area">
+                                <textarea class="chat-input" id="chatInput" placeholder="输入你的回答...（Shift+Enter 换行，Enter 发送）" rows="1"></textarea>
+                                <button class="chat-send-btn" id="chatSendBtn">发送</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 编辑题目 Modal ========== -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">编辑题目</div>
+                <button class="modal-close" data-close="editModal">×</button>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label class="form-label">题目内容</label>
+                    <textarea class="form-textarea" id="editContent" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">类型</label>
+                        <select class="form-select" id="editType">
+                            <option value="bagua">八股题</option>
+                            <option value="project">项目题</option>
+                            <option value="algorithm">算法题</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">分类</label>
+                        <select class="form-select" id="editCategory">
+                            <option value="redis">redis</option>
+                            <option value="mysql">mysql</option>
+                            <option value="java">java</option>
+                            <option value="multithreading">multithreading</option>
+                            <option value="collection">collection</option>
+                            <option value="network">network</option>
+                            <option value="os">os</option>
+                            <option value="distributed">distributed</option>
+                            <option value="spring">spring</option>
+                            <option value="design_pattern">design_pattern</option>
+                            <option value="project">project</option>
+                            <option value="algorithm">algorithm</option>
+                            <option value="other">other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">难度</label>
+                    <select class="form-select" id="editDifficulty">
+                        <option value="1">1 星</option>
+                        <option value="2">2 星</option>
+                        <option value="3">3 星</option>
+                        <option value="4">4 星</option>
+                        <option value="5">5 星</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">参考答案</label>
+                    <textarea class="form-textarea" id="editAnswer" style="min-height:120px;"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" data-close="editModal">取消</button>
+                    <button type="submit" class="btn btn-primary">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== 新增题目 Modal ========== -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">新增题目</div>
+                <button class="modal-close" data-close="addModal">×</button>
+            </div>
+            <form id="addForm">
+                <div class="form-group">
+                    <label class="form-label">题目内容</label>
+                    <textarea class="form-textarea" id="addContent" required placeholder="输入题目内容..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">类型</label>
+                        <select class="form-select" id="addType">
+                            <option value="bagua">八股题</option>
+                            <option value="project">项目题</option>
+                            <option value="algorithm">算法题</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">分类</label>
+                        <select class="form-select" id="addCategory">
+                            <option value="redis">redis</option>
+                            <option value="mysql">mysql</option>
+                            <option value="java">java</option>
+                            <option value="multithreading">multithreading</option>
+                            <option value="collection">collection</option>
+                            <option value="network">network</option>
+                            <option value="os">os</option>
+                            <option value="distributed">distributed</option>
+                            <option value="spring">spring</option>
+                            <option value="design_pattern">design_pattern</option>
+                            <option value="project">project</option>
+                            <option value="algorithm">algorithm</option>
+                            <option value="other">other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">难度</label>
+                    <select class="form-select" id="addDifficulty">
+                        <option value="1">1 星</option>
+                        <option value="2">2 星</option>
+                        <option value="3" selected>3 星</option>
+                        <option value="4">4 星</option>
+                        <option value="5">5 星</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">参考答案（可选）</label>
+                    <textarea class="form-textarea" id="addAnswer" style="min-height:110px;" placeholder="输入参考答案..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" data-close="addModal">取消</button>
+                    <button type="submit" class="btn btn-primary">添加题目</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== 添加项目 Modal ========== -->
+    <div class="modal-overlay" id="projectModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">添加项目</div>
+                <button class="modal-close" data-close="projectModal">×</button>
+            </div>
+            <div class="modal-tabs">
+                <button class="modal-tab active" data-ptab="auto">智能识别（推荐）</button>
+                <button class="modal-tab" data-ptab="manual">手动填写</button>
+            </div>
+            <form id="autoRecognizeForm">
+                <div class="form-group">
+                    <label class="form-label">项目描述文字段落</label>
+                    <textarea class="form-textarea" id="autoDesc" required style="min-height:180px;" placeholder="粘贴一段项目描述，agent会自动识别项目名称、类型、技术栈...
+
+例如：
+这是一个电商秒杀系统，使用Spring Boot + Redis + RabbitMQ构建，
+主要解决高并发场景下的库存扣减问题，包含商品管理、订单、支付等模块..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" data-close="projectModal">取消</button>
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        智能识别
+                    </button>
+                </div>
+            </form>
+            <form id="manualProjectForm" style="display:none;">
+                <div class="form-group">
+                    <label class="form-label">项目名称</label>
+                    <input type="text" class="form-input" id="manualName" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">项目描述</label>
+                    <textarea class="form-textarea" id="manualDesc" required></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">技术栈（逗号分隔）</label>
+                        <input type="text" class="form-input" id="manualTech" placeholder="Spring Boot,Redis,MySQL">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">项目类型</label>
+                        <input type="text" class="form-input" id="manualType" placeholder="如：Web/微服务/工具">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" data-close="projectModal">取消</button>
+                    <button type="submit" class="btn btn-primary">创建项目</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+    /* ============================================================
+       GT_agent 前端逻辑
+       ============================================================ */
+    const API_BASE = '';
+
+    /* ---------- 通用工具 ---------- */
+    function getToken() { return localStorage.getItem('gt_token'); }
+    function setToken(t) { localStorage.setItem('gt_token', t); }
+    function clearToken() { localStorage.removeItem('gt_token'); localStorage.removeItem('gt_user'); }
+
+    function toast(msg, type = '') {
+        const wrap = document.getElementById('toast');
+        const el = document.createElement('div');
+        el.className = 'toast-item ' + type;
+        el.textContent = msg;
+        wrap.appendChild(el);
+        setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(100%)'; el.style.transition = 'all 0.3s'; setTimeout(() => el.remove(), 300); }, 3000);
+    }
+
+    async function api(path, options = {}) {
+        const opts = { headers: {}, ...options };
+        const token = getToken();
+        if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+        try {
+            const res = await fetch(API_BASE + path, opts);
+            if (res.status === 401) {
+                clearToken();
+                showLogin();
+                throw new Error('未授权，请重新登录');
+            }
+            const text = await res.text();
+            let data;
+            try { data = text ? JSON.parse(text) : {}; } catch (e) { data = { raw: text }; }
+            if (!res.ok) {
+                throw new Error(data.detail || data.message || data.raw || ('请求失败 ' + res.status));
+            }
+            return data;
+        } catch (err) {
+            if (err.message === 'Failed to fetch') {
+                toast('网络错误，无法连接服务器', 'error');
+            }
+            throw err;
+        }
+    }
+
+    function apiJson(path, method, body) {
+        return api(path, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+    }
+
+    function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function formatAnswer(text) {
+        let s = String(text || '');
+        if (!s) return '';
+        if (/\n/.test(s)) return s;
+        s = s.replace(/([。；！？;:：])\s*(?=\d+[.、．)\）]\s*[\u4e00-\u9fa5A-Za-z（(])/g, '$1\n');
+        s = s.replace(/([。；！？;:：])\s*(?=[一二三四五六七八九十]+[、．.]\s*[\u4e00-\u9fa5A-Za-z（(])/g, '$1\n');
+        s = s.replace(/(^|\n)\s*/g, '$1');
+        return s;
+    }
+
+    function renderStars(n) {
+        n = Number(n) || 0;
+        let html = '<div class="stars">';
+        for (let i = 1; i <= 5; i++) {
+            html += `<span class="star ${i <= n ? 'filled' : ''}">★</span>`;
+        }
+        html += '</div>';
+        return html;
+    }
+
+    function typeTagClass(t) {
+        if (t === 'bagua') return 'tag-bagua';
+        if (t === 'project') return 'tag-project';
+        if (t === 'algorithm') return 'tag-algorithm';
+        return '';
+    }
+    function typeLabel(t) {
+        if (t === 'bagua') return '八股题';
+        if (t === 'project') return '项目题';
+        if (t === 'algorithm') return '算法题';
+        return t || '';
+    }
+
+    /* ---------- 登录/注册 ---------- */
+    function showLogin() {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('app').style.display = 'none';
+        // 检查注册开关
+        fetch(API_BASE + '/api/auth/register-enabled')
+            .then(r => r.json())
+            .then(res => {
+                const regTabs = document.querySelectorAll('.login-tab[data-tab="register"]');
+                const hide = !res.allow_register;
+                regTabs.forEach(t => t.style.display = hide ? 'none' : '');
+                if (hide) {
+                    // 强制切回登录
+                    document.querySelectorAll('.login-tab').forEach(x => x.classList.remove('active'));
+                    document.querySelector('.login-tab[data-tab="login"]').classList.add('active');
+                    document.getElementById('loginForm').style.display = 'block';
+                    document.getElementById('registerForm').style.display = 'none';
+                }
+            })
+            .catch(() => {/* 本地开发默认显示 */});
+    }
+    function showApp() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('app').style.display = 'flex';
+        const user = localStorage.getItem('gt_user') || '用户';
+        document.getElementById('navUserName').textContent = user;
+        loadLibrary();
+        loadProjects();
+    }
+
+    document.querySelectorAll('.login-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const isLogin = tab.dataset.tab === 'login';
+            document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
+            document.getElementById('registerForm').style.display = isLogin ? 'none' : 'block';
+        });
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        if (!username || !password) return;
+        try {
+            const params = new URLSearchParams();
+            params.append('username', username);
+            params.append('password', password);
+            const res = await api('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            });
+            if (res.access_token) {
+                setToken(res.access_token);
+                localStorage.setItem('gt_user', username);
+                toast('登录成功', 'success');
+                showApp();
+            } else {
+                toast('登录失败：' + (res.detail || '未知错误'), 'error');
+            }
+        } catch (err) {
+            toast('登录失败：' + err.message, 'error');
+        }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('regUsername').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const password = document.getElementById('regPassword').value;
+        if (!username || !email || !password) return;
+        try {
+            await apiJson('/api/auth/register', 'POST', { username, email, password });
+            toast('注册成功，请登录', 'success');
+            document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('.login-tab[data-tab="login"]').classList.add('active');
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginUsername').value = username;
+        } catch (err) {
+            toast('注册失败：' + err.message, 'error');
+        }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        clearToken();
+        showLogin();
+    });
+
+    /* ---------- 页面切换 ---------- */
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const page = item.dataset.page;
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+            if (page === 'library') loadLibrary();
+            if (page === 'projects') loadProjects();
+            if (page === 'exam') loadProjectOptions();
+            if (page === 'interview') initInterviewPage();
+        });
+    });
+
+    /* ---------- Modal 通用关闭 ---------- */
+    document.querySelectorAll('[data-close]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById(btn.dataset.close).classList.remove('show');
+        });
+    });
+    document.querySelectorAll('.modal-overlay').forEach(ov => {
+        ov.addEventListener('click', (e) => { if (e.target === ov) ov.classList.remove('show'); });
+    });
+
+    /* ============================================================
+       页面1：题目提取
+       ============================================================ */
+    window.switchExtractTab = function(tab) {
+        const batchBtn = document.querySelector('[data-tab="extract-batch"]');
+        const solveBtn = document.querySelector('[data-tab="extract-solve"]');
+        const batchPane = document.getElementById('extractBatchPane');
+        const solvePane = document.getElementById('extractSolvePane');
+        if (tab === 'batch') {
+            batchBtn.classList.add('active');
+            solveBtn.classList.remove('active');
+            batchPane.style.display = 'block';
+            solvePane.style.display = 'none';
+        } else {
+            batchBtn.classList.remove('active');
+            solveBtn.classList.add('active');
+            batchPane.style.display = 'none';
+            solvePane.style.display = 'block';
+        }
+    };
+
+    // 解题助手对话逻辑
+    let solveSending = false;
+
+    function appendSolveMsg(role, text, meta) {
+        const chatBox = document.getElementById('solveChatBox');
+        // 清掉欢迎语
+        const welcome = chatBox.querySelector('div[style*="text-align:center"]');
+        if (welcome) welcome.remove();
+
+        const div = document.createElement('div');
+        div.className = 'chat-msg ' + (role === 'user' ? 'user' : 'interviewer');
+        const avatar = role === 'user' ? '我' : 'AI';
+        const metaHtml = meta ? `<div style="font-size:11px; color:var(--text-tertiary); margin-top:6px; padding:6px 0; border-top:1px dashed var(--border);">${meta}</div>` : '';
+        div.innerHTML = `<div class="chat-avatar">${avatar}</div><div><div class="chat-bubble">${escapeHtml(formatAnswer(text))}</div>${metaHtml}</div>`;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return div;
+    }
+
+    function appendSolveTyping() {
+        const chatBox = document.getElementById('solveChatBox');
+        const div = document.createElement('div');
+        div.className = 'chat-msg interviewer';
+        div.innerHTML = `<div class="chat-avatar">AI</div><div><div class="chat-bubble" style="display:flex; gap:4px; align-items:center;"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>`;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return div;
+    }
+
+    async function sendSolveQuestion() {
+        const input = document.getElementById('solveInput');
+        const text = input.value.trim();
+        if (!text || solveSending) return;
+        solveSending = true;
+        const sendBtn = document.getElementById('solveSendBtn');
+        sendBtn.disabled = true;
+        input.value = '';
+        input.style.height = 'auto';
+
+        appendSolveMsg('user', text);
+        const typingEl = appendSolveTyping();
+
+        try {
+            const autoSave = document.getElementById('autoSaveSolve').checked;
+            const res = await apiJson('/api/questions/solve', 'POST', {
+                question: text,
+                auto_save: autoSave
+            });
+            typingEl.remove();
+
+            let meta = '';
+            if (res.refined_question && res.refined_question !== text) {
+                meta += `📝 改写：${escapeHtml(res.refined_question)}<br>`;
+            }
+            if (res.category) {
+                meta += `🏷 分类：${escapeHtml(res.category)}`;
+                if (res.difficulty) {
+                    let stars = '';
+                    for (let i = 1; i <= 5; i++) stars += i <= res.difficulty ? '★' : '☆';
+                    meta += ` · ${stars}`;
+                }
+                meta += '<br>';
+            }
+            if (res.saved) {
+                meta += `✅ 已存入题库${res.duplicate_of_id ? '（重复题，已更新答案）' : '（高权重，优先复习）'}`;
+            } else if (!autoSave) {
+                meta += `<button class="btn btn-primary btn-sm" style="margin-top:6px; padding:3px 10px; font-size:11px;" onclick="saveSolveResult()">存入题库</button>`;
+                window._lastSolveResult = res;
+            }
+
+            appendSolveMsg('interviewer', res.answer || '暂无答案', meta);
+            if (res.saved) loadLibrary();
+        } catch (err) {
+            typingEl.remove();
+            appendSolveMsg('interviewer', '出错了：' + err.message);
+        } finally {
+            solveSending = false;
+            sendBtn.disabled = false;
+        }
+    }
+
+    window.saveSolveResult = function() {
+        const res = window._lastSolveResult;
+        if (!res) return;
+        apiJson('/api/questions', 'POST', {
+            content: res.refined_question || '',
+            question_type: res.question_type || 'bagua',
+            category: res.category || 'other',
+            difficulty: res.difficulty || 3,
+            answer: res.answer || '',
+            source: 'solve_agent'
+        }).then(() => {
+            toast('已存入题库', 'success');
+            loadLibrary();
+        }).catch(err => {
+            toast('保存失败：' + err.message, 'error');
+        });
+    };
+
+    document.getElementById('solveSendBtn').addEventListener('click', sendSolveQuestion);
+    document.getElementById('solveInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendSolveQuestion();
+        }
+    });
+    document.getElementById('solveInput').addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    // 公共 OCR 上传函数：复用给"从文件选取"和"Ctrl+V 粘贴截图"两条路径
+    async function ocrImageFile(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/questions/ocr', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + getToken() },
+            body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || 'OCR失败');
+        return data.text || '';
+    }
+
+    // 把识别出的文字追加到提取框（已有内容时用空行分隔）
+    function appendExtractedText(text) {
+        const textarea = document.getElementById('extractText');
+        const existing = textarea.value.trim();
+        textarea.value = existing ? existing + '\n\n' + text : text;
+    }
+
+    // OCR 图片提取文字（按钮：从文件选取）
+    document.getElementById('ocrBtn').addEventListener('click', () => {
+        document.getElementById('ocrFileInput').click();
+    });
+    document.getElementById('ocrFileInput').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        e.target.value = ''; // 重置以便重复选同一张
+        const btn = document.getElementById('ocrBtn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner" style="width:14px; height:14px; border-width:2px;"></div> 识别中...';
+        try {
+            const text = await ocrImageFile(file);
+            appendExtractedText(text);
+            toast('已提取文字，可编辑后点击"开始解析"', 'success');
+        } catch (err) {
+            toast('图片识别失败：' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    });
+
+    // Ctrl+V / Cmd+V 粘贴截图：监听提取框的 paste 事件，
+    // 从剪贴板检测到图片时自动走 OCR，无需从文件选取
+    document.getElementById('extractText').addEventListener('paste', async (e) => {
+        const items = e.clipboardData && e.clipboardData.items;
+        if (!items) return;
+        let imageFile = null;
+        for (const it of items) {
+            if (it.type && it.type.startsWith('image/')) {
+                imageFile = it.getAsFile();
+                break;
+            }
+        }
+        if (!imageFile) return; // 普通文本粘贴，交给浏览器默认行为
+        // 拦截默认粘贴（避免把图片当文件名塞进 textarea）
+        e.preventDefault();
+        // 给截图片起个名（剪贴板里的图片通常是 image.png）
+        if (!imageFile.name || imageFile.name === 'image.png') {
+            imageFile = new File([imageFile], 'pasted-' + Date.now() + '.png', { type: imageFile.type });
+        }
+        const btn = document.getElementById('ocrBtn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner" style="width:14px; height:14px; border-width:2px;"></div> 粘贴识别中...';
+        try {
+            const text = await ocrImageFile(imageFile);
+            appendExtractedText(text);
+            toast('已从粘贴截图提取文字，可编辑后点击"开始解析"', 'success');
+        } catch (err) {
+            toast('粘贴截图识别失败：' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    });
+
+    document.getElementById('extractBtn').addEventListener('click', async () => {
+        const text = document.getElementById('extractText').value.trim();
+        if (!text) { toast('请粘贴面经文本', 'error'); return; }
+        const loading = document.getElementById('extractLoading');
+        const result = document.getElementById('extractResult');
+        const btn = document.getElementById('extractBtn');
+        loading.style.display = 'flex';
+        result.innerHTML = '';
+        btn.disabled = true;
+        try {
+            // 用 fetch 拿到完整响应，读取自定义 header X-Skipped-Duplicates
+            const fetchRes = await fetch('/api/questions/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+                body: JSON.stringify({ text })
+            });
+            const res = await fetchRes.json();
+            const skippedDup = parseInt(fetchRes.headers.get('X-Skipped-Duplicates') || '0', 10);
+            const questions = Array.isArray(res) ? res : (res.questions || res.data || []);
+            loading.style.display = 'none';
+            if (questions.length === 0 && skippedDup === 0) {
+                result.innerHTML = '<div class="empty-state"><p>未提取到题目，请尝试更详细的面经文本</p></div>';
+                return;
+            }
+            result.innerHTML = questions.map((q, i) => {
+                const answer = q.answer || '';
+                const hasAnswer = answer.length > 0;
+                const matchedProj = q.matched_project_ids && q.matched_project_ids.length > 0;
+                return `
+                <div class="flip-card" onclick="flipCard(this, event)">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <div class="q-header">
+                                <div class="q-tags">
+                                    <span class="num-badge">${i + 1}</span>
+                                    ${q.question_type ? `<span class="tag ${typeTagClass(q.question_type)}">${typeLabel(q.question_type)}</span>` : ''}
+                                    ${q.category ? `<span class="tag">${escapeHtml(q.category)}</span>` : ''}
+                                    ${matchedProj ? '<span class="tag tag-project">已关联项目</span>' : '<span class="tag">已存入题库</span>'}
+                                </div>
+                                ${q.difficulty ? renderStars(q.difficulty) : ''}
+                            </div>
+                            <div class="q-content">${escapeHtml(q.content || q.question || '')}</div>
+                            <div class="flip-hint">${hasAnswer ? '点击卡片查看答案' : '点击卡片查看（暂无答案）'}</div>
+                        </div>
+                        <div class="flip-card-back">
+                            <div class="q-header">
+                                <div class="q-tags">
+                                    <span class="tag tag-answer">答案</span>
+                                </div>
+                            </div>
+                            <div class="answer-text">${hasAnswer ? escapeHtml(formatAnswer(answer)) : '<span style="color:var(--text-tertiary);">暂无答案</span>'}</div>
+                            <div class="flip-hint">点击卡片返回题目</div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            if (skippedDup > 0) {
+                toast(`已存入 ${questions.length} 道新题，跳过 ${skippedDup} 道重复题`, 'success');
+            } else {
+                toast(`成功提取 ${questions.length} 道题目并已存入题库`, 'success');
+            }
+        } catch (err) {
+            loading.style.display = 'none';
+            toast('提取失败：' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    /* ============================================================
+       页面2：题库管理 - 完整CRUD
+       ============================================================ */
+    let allQuestions = [];
+
+    async function loadLibrary() {
+        const grid = document.getElementById('questionGrid');
+        const loading = document.getElementById('libraryLoading');
+        const empty = document.getElementById('libraryEmpty');
+        loading.style.display = 'flex';
+        grid.innerHTML = '';
+        empty.style.display = 'none';
+        try {
+            const res = await api('/api/questions');
+            allQuestions = Array.isArray(res) ? res : (res.questions || res.data || []);
+            loading.style.display = 'none';
+            renderQuestions();
+        } catch (err) {
+            loading.style.display = 'none';
+            toast('加载题库失败：' + err.message, 'error');
+        }
+    }
+
+    function getFilteredQuestions() {
+        const ft = document.getElementById('filterType').value;
+        const fc = document.getElementById('filterCategory').value;
+        const fd = document.getElementById('filterDifficulty').value;
+        return allQuestions.filter(q => {
+            if (ft && q.question_type !== ft) return false;
+            if (fc && q.category !== fc) return false;
+            if (fd && String(q.difficulty) !== fd) return false;
+            return true;
+        });
+    }
+
+    function renderQuestions() {
+        const grid = document.getElementById('questionGrid');
+        const empty = document.getElementById('libraryEmpty');
+        const filtered = getFilteredQuestions();
+        // 前端再保险一次：星标置顶
+        filtered.sort((a, b) => {
+            const sa = a.starred ? 1 : 0;
+            const sb = b.starred ? 1 : 0;
+            if (sa !== sb) return sb - sa;
+            return new Date(b.created_at) - new Date(a.created_at);
+        });
+        document.getElementById('totalStat').textContent = allQuestions.length;
+        document.getElementById('filteredStat').textContent = filtered.length;
+        if (filtered.length === 0) {
+            grid.innerHTML = '';
+            empty.style.display = 'block';
+            return;
+        }
+        empty.style.display = 'none';
+        grid.innerHTML = filtered.map(q => {
+            const isConfused = q.is_confused || q.confused;
+            const answer = q.answer || '';
+            const hasAnswer = answer.length > 0;
+            const isStarred = !!q.starred;
+            const rowClass = [
+                'q-row',
+                isStarred ? 'is-starred' : '',
+                isConfused ? 'is-confused' : ''
+            ].filter(Boolean).join(' ');
+            return `
+            <div class="${rowClass}" data-qid="${q.id}">
+                <div class="q-row-head" onclick="toggleRow(${q.id})">
+                    <div class="q-row-tags">
+                        ${q.question_type ? `<span class="tag ${typeTagClass(q.question_type)}">${typeLabel(q.question_type)}</span>` : ''}
+                        ${q.category ? `<span class="tag">${escapeHtml(q.category)}</span>` : ''}
+                        ${isConfused ? '<span class="tag tag-confused">困惑</span>' : ''}
+                    </div>
+                    <div class="q-row-content">${escapeHtml(q.content || q.question || '')}</div>
+                    <div class="q-row-meta">
+                        ${q.difficulty ? `<span class="q-row-stars">${renderStars(q.difficulty)}</span>` : ''}
+                        <span class="q-row-toggle" title="点击展开/收起答案">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        </span>
+                    </div>
+                </div>
+                <div class="q-row-body">
+                    ${hasAnswer
+                        ? `<div class="q-row-answer">${escapeHtml(formatAnswer(answer))}</div>`
+                        : `<div class="q-row-empty">暂无答案，可点击编辑添加</div>`}
+                    <div class="q-row-body-actions">
+                        <button class="icon-btn star-btn ${isStarred ? 'starred' : ''}" onclick="toggleStar(${q.id})">
+                            <svg viewBox="0 0 24 24" fill="${isStarred ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                            ${isStarred ? '已星标' : '星标'}
+                        </button>
+                        <button class="icon-btn" onclick="markConfused(${q.id})">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            困惑
+                        </button>
+                        <button class="icon-btn" onclick="openEdit(${q.id})">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            编辑
+                        </button>
+                        <button class="icon-btn danger" onclick="deleteQuestion(${q.id})">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            删除
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    window.toggleStar = async function(id) {
+        try {
+            const res = await api('/api/questions/' + id + '/star', { method: 'POST' });
+            const q = allQuestions.find(x => x.id === id);
+            if (q) q.starred = !!res.starred;
+            renderQuestions();
+            toast(res.starred ? '已星标，该题已置顶' : '已取消星标', 'success');
+        } catch (err) {
+            toast('星标失败：' + err.message, 'error');
+        }
+    };
+
+    // 行展开/收起：手风琴模式，同时只展开一道题
+    window.toggleRow = function(id) {
+        const rows = document.querySelectorAll('.q-row');
+        let target = null;
+        rows.forEach(r => {
+            if (parseInt(r.dataset.qid) === id) {
+                target = r;
+            } else {
+                r.classList.remove('expanded');
+            }
+        });
+        if (target) target.classList.toggle('expanded');
+    };
+
+    // 题目提取页的翻转卡片（点击翻面看答案）
+    window.flipCard = function(el, e) {
+        if (e.target.closest('.q-actions') || e.target.closest('button')) return;
+        el.classList.toggle('flipped');
+    };
+
+    document.getElementById('filterType').addEventListener('change', renderQuestions);
+    document.getElementById('filterCategory').addEventListener('change', renderQuestions);
+    document.getElementById('filterDifficulty').addEventListener('change', renderQuestions);
+    document.getElementById('resetFilterBtn').addEventListener('click', () => {
+        document.getElementById('filterType').value = '';
+        document.getElementById('filterCategory').value = '';
+        document.getElementById('filterDifficulty').value = '';
+        renderQuestions();
+    });
+
+    window.markConfused = async function(id) {
+        try {
+            await api('/api/questions/' + id + '/mark-confused', { method: 'POST' });
+            const q = allQuestions.find(x => x.id === id);
+            if (q) q.is_confused = !q.is_confused;
+            toast('已标记为困惑题目', 'success');
+            renderQuestions();
+        } catch (err) {
+            toast('标记失败：' + err.message, 'error');
+        }
+    };
+
+    window.openEdit = function(id) {
+        const q = allQuestions.find(x => x.id === id);
+        if (!q) { toast('题目不存在', 'error'); return; }
+        document.getElementById('editId').value = id;
+        document.getElementById('editContent').value = q.content || q.question || '';
+        document.getElementById('editType').value = q.question_type || 'bagua';
+        document.getElementById('editCategory').value = q.category || 'other';
+        document.getElementById('editDifficulty').value = String(q.difficulty || 3);
+        document.getElementById('editAnswer').value = q.answer || '';
+        document.getElementById('editModal').classList.add('show');
+    };
+
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('editId').value;
+        const params = new URLSearchParams();
+        params.append('content', document.getElementById('editContent').value);
+        params.append('question_type', document.getElementById('editType').value);
+        params.append('category', document.getElementById('editCategory').value);
+        params.append('difficulty', document.getElementById('editDifficulty').value);
+        params.append('answer', document.getElementById('editAnswer').value);
+        try {
+            await api('/api/questions/' + id + '?' + params.toString(), { method: 'PUT' });
+            toast('修改成功', 'success');
+            document.getElementById('editModal').classList.remove('show');
+            await loadLibrary();
+        } catch (err) {
+            toast('修改失败：' + err.message, 'error');
+        }
+    });
+
+    window.deleteQuestion = async function(id) {
+        if (!confirm('确定删除这道题目吗？此操作不可恢复。')) return;
+        try {
+            await api('/api/questions/' + id, { method: 'DELETE' });
+            toast('已删除', 'success');
+            await loadLibrary();
+        } catch (err) {
+            toast('删除失败：' + err.message, 'error');
+        }
+    };
+
+    document.getElementById('addQuestionBtn').addEventListener('click', () => {
+        document.getElementById('addForm').reset();
+        document.getElementById('addModal').classList.add('show');
+    });
+
+    document.getElementById('addForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const content = document.getElementById('addContent').value;
+        const question_type = document.getElementById('addType').value;
+        const category = document.getElementById('addCategory').value;
+        const difficulty = document.getElementById('addDifficulty').value;
+        const answer = document.getElementById('addAnswer').value;
+        try {
+            const params = new URLSearchParams();
+            params.append('content', content);
+            params.append('question_type', question_type);
+            params.append('category', category);
+            params.append('difficulty', difficulty);
+            params.append('answer', answer);
+            await api('/api/questions?' + params.toString(), { method: 'POST' });
+            toast('题目已添加', 'success');
+            document.getElementById('addModal').classList.remove('show');
+            await loadLibrary();
+        } catch (err) {
+            try {
+                await apiJson('/api/questions', 'POST', { content, question_type, category, difficulty: Number(difficulty), answer });
+                toast('题目已添加', 'success');
+                document.getElementById('addModal').classList.remove('show');
+                await loadLibrary();
+            } catch (err2) {
+                toast('添加失败：' + err2.message, 'error');
+            }
+        }
+    });
+
+    /* ============================================================
+       页面3：项目管理
+       ============================================================ */
+    let allProjects = [];
+
+    async function loadProjects() {
+        const grid = document.getElementById('projectGrid');
+        const loading = document.getElementById('projectLoading');
+        const empty = document.getElementById('projectEmpty');
+        loading.style.display = 'flex';
+        grid.innerHTML = '';
+        empty.style.display = 'none';
+        try {
+            const res = await api('/api/projects');
+            allProjects = Array.isArray(res) ? res : (res.projects || res.data || []);
+            loading.style.display = 'none';
+            renderProjects();
+        } catch (err) {
+            loading.style.display = 'none';
+            toast('加载项目失败：' + err.message, 'error');
+        }
+    }
+
+    function renderProjects() {
+        const grid = document.getElementById('projectGrid');
+        const empty = document.getElementById('projectEmpty');
+        if (allProjects.length === 0) {
+            grid.innerHTML = '';
+            empty.style.display = 'block';
+            return;
+        }
+        empty.style.display = 'none';
+        grid.innerHTML = allProjects.map(p => {
+            const techs = Array.isArray(p.tech_stack) ? p.tech_stack : (p.tech_stack ? String(p.tech_stack).split(',') : []);
+            return `
+            <div class="card project-card">
+                <div class="p-name">${escapeHtml(p.name || '')}</div>
+                <div class="p-type">${p.project_type ? `<span class="tag">${escapeHtml(p.project_type)}</span>` : ''}</div>
+                <div class="p-desc">${escapeHtml(p.description || '')}</div>
+                <div class="p-tech">${techs.map(t => `<span class="tag">${escapeHtml(t.trim())}</span>`).join('')}</div>
+                <div class="p-actions">
+                    <button class="icon-btn" onclick="analyzeProject(${p.id}, this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        AI分析
+                    </button>
+                    <button class="icon-btn danger" onclick="deleteProject(${p.id})" title="删除项目">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        删除
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    window.deleteProject = async function(id) {
+        if (!confirm('确定删除该项目？关联的题目会保留在题库中。')) return;
+        try {
+            await api('/api/projects/' + id, { method: 'DELETE' });
+            toast('已删除项目', 'success');
+            await loadProjects();
+        } catch (err) {
+            toast('删除失败：' + err.message, 'error');
+        }
+    };
+
+    document.getElementById('addProjectBtn').addEventListener('click', () => {
+        document.getElementById('projectModal').classList.add('show');
+    });
+
+    document.querySelectorAll('.modal-tab[data-ptab]').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.modal-tab[data-ptab]').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const isAuto = tab.dataset.ptab === 'auto';
+            document.getElementById('autoRecognizeForm').style.display = isAuto ? 'block' : 'none';
+            document.getElementById('manualProjectForm').style.display = isAuto ? 'none' : 'block';
+        });
+    });
+
+    document.getElementById('autoRecognizeForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const desc = document.getElementById('autoDesc').value.trim();
+        if (!desc) return;
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<div class="spinner" style="width:14px;height:14px; display:inline-block; vertical-align:middle;"></div> 识别中';
+        try {
+            const res = await api('/api/projects/auto-recognize?description=' + encodeURIComponent(desc), { method: 'POST' });
+            toast('智能识别成功：' + (res.name || '项目'), 'success');
+            document.getElementById('projectModal').classList.remove('show');
+            document.getElementById('autoDesc').value = '';
+            await loadProjects();
+        } catch (err) {
+            toast('识别失败：' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }
+    });
+
+    document.getElementById('manualProjectForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('manualName').value.trim();
+        const description = document.getElementById('manualDesc').value.trim();
+        const techStr = document.getElementById('manualTech').value.trim();
+        const project_type = document.getElementById('manualType').value.trim();
+        if (!name || !description) return;
+        const tech_stack = techStr ? techStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+        try {
+            await apiJson('/api/projects/', 'POST', { name, description, tech_stack, project_type });
+            toast('项目已创建', 'success');
+            document.getElementById('projectModal').classList.remove('show');
+            document.getElementById('manualProjectForm').reset();
+            await loadProjects();
+        } catch (err) {
+            toast('创建失败：' + err.message, 'error');
+        }
+    });
+
+    window.analyzeProject = async function(id, btn) {
+        btn.disabled = true;
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<div class="spinner" style="width:13px;height:13px;"></div> 分析中';
+        try {
+            const res = await api('/api/llm/analyze-project/' + id, { method: 'POST' });
+            const analysis = res.analysis || res.result || res.data || JSON.stringify(res);
+            toast('AI分析完成', 'success');
+            alert('项目分析结果：\n\n' + (typeof analysis === 'string' ? analysis : JSON.stringify(analysis, null, 2)));
+        } catch (err) {
+            toast('分析失败：' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }
+    };
+
+    /* ============================================================
+       页面4：智能出题
+       ============================================================ */
+    let selectedMode = 'bagua';
+    document.querySelectorAll('.mode-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            selectedMode = card.dataset.mode;
+            document.getElementById('projectSelectWrap').style.display = (selectedMode === 'project' || selectedMode === 'mixed') ? 'flex' : 'none';
+        });
+    });
+
+    async function loadProjectOptions() {
+        try {
+            const res = await api('/api/projects');
+            const list = Array.isArray(res) ? res : (res.projects || res.data || []);
+            const sel = document.getElementById('examProject');
+            sel.innerHTML = '<option value="">选择项目</option>' + list.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+        } catch (err) { /* ignore */ }
+    }
+
+    document.getElementById('generateExamBtn').addEventListener('click', async () => {
+        const count = Number(document.getElementById('examCount').value);
+        const project_id = selectedMode === 'bagua' ? null : document.getElementById('examProject').value;
+        if ((selectedMode === 'project' || selectedMode === 'mixed') && !project_id) {
+            toast('请选择关联项目', 'error');
+            return;
+        }
+        const loading = document.getElementById('examLoading');
+        const paper = document.getElementById('examPaper');
+        const btn = document.getElementById('generateExamBtn');
+        loading.style.display = 'flex';
+        paper.innerHTML = '';
+        btn.disabled = true;
+        try {
+            const body = { mode: selectedMode, count };
+            if (project_id) body.project_id = Number(project_id);
+            const res = await apiJson('/api/exams/generate', 'POST', body);
+            const questions = Array.isArray(res) ? res : (res.questions || res.data || []);
+            const genCount = res.generated_count || 0;
+            const libCount = res.library_count || 0;
+            loading.style.display = 'none';
+            if (questions.length === 0) {
+                paper.innerHTML = '<div class="empty-state"><p>未能生成题目，请稍后重试</p></div>';
+                return;
+            }
+            const modeLabel = selectedMode === 'bagua' ? '八股题' : selectedMode === 'project' ? '项目题' : '混合模式';
+            const genQuestions = questions.filter(q => q.source_type === 'generated');
+            paper.innerHTML = `
+                <div class="exam-paper">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <h3 style="font-size:17px; font-weight:700; margin-bottom:2px;">智能试卷</h3>
+                            <p class="paper-meta" style="margin-bottom:0;">共 ${questions.length} 题 · ${modeLabel} · AI生成 ${genCount} 题 + 题库 ${libCount} 题</p>
+                        </div>
+                        ${genQuestions.length > 0 ? `<button class="btn btn-primary btn-sm" id="saveAllToLibBtn">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            全部加入题库
+                        </button>` : ''}
+                    </div>
+                    <div id="examQList" class="q-list">
+                    ${questions.map((q, i) => {
+                        const answer = q.answer || '';
+                        const hasAnswer = answer.length > 0;
+                        const sourceType = q.source_type === 'library' ? 'lib' : 'gen';
+                        const sourceLabel = q.source_type === 'library' ? '题库' : 'AI生成';
+                        const isGen = q.source_type === 'generated';
+                        return `
+                        <div class="q-row" data-eqid="${i}">
+                            <div class="q-row-head" style="padding-left:10px;" onclick="toggleExamQ(${i})">
+                                <span class="eq-num" style="margin-right:0;">${i + 1}</span>
+                                <div class="q-row-tags">
+                                    ${q.question_type ? `<span class="tag ${typeTagClass(q.question_type)}">${typeLabel(q.question_type)}</span>` : ''}
+                                    ${q.category ? `<span class="tag">${escapeHtml(q.category)}</span>` : ''}
+                                    <span class="tag ${sourceType === 'gen' ? 'tag-generated' : 'tag-library'}">${sourceLabel}</span>
+                                </div>
+                                <div class="q-row-content">${escapeHtml(q.content || q.question || '')}</div>
+                                <div class="q-row-meta">
+                                    ${hasAnswer ? '<span style="font-size:11px; color:var(--text-tertiary);">点击查看答案</span>' : ''}
+                                    <span class="q-row-toggle">▸</span>
+                                </div>
+                            </div>
+                            <div class="q-row-body">
+                                ${hasAnswer
+                                    ? `<div class="q-row-answer">${escapeHtml(formatAnswer(answer))}</div>`
+                                    : `<div class="q-row-empty">暂无答案</div>`}
+                                <div class="q-row-body-actions">
+                                    ${isGen ? `<button class="icon-btn" onclick="saveExamQToLib(${i})" id="saveQBtn-${i}">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                        加入题库
+                                    </button>` : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                    </div>
+                </div>`;
+            window._examQuestions = questions;
+            toast('试卷已生成', 'success');
+            if (genQuestions.length > 0) {
+                document.getElementById('saveAllToLibBtn').addEventListener('click', saveAllExamToLib);
+            }
+        } catch (err) {
+            loading.style.display = 'none';
+            toast('生成失败：' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    window.toggleExamQ = function(idx) {
+        const rows = document.querySelectorAll('#examQList .q-row');
+        rows.forEach((r, i) => {
+            if (i === idx) r.classList.toggle('expanded');
+        });
+    };
+
+    async function _saveQuestionToLib(q) {
+        try {
+            await apiJson('/api/questions', 'POST', {
+                content: q.content || q.question || '',
+                question_type: q.question_type || 'bagua',
+                category: q.category || 'other',
+                difficulty: q.difficulty || 3,
+                answer: q.answer || '',
+                source: 'exam_generated'
+            });
+            return true;
+        } catch (err) {
+            if (err.message && err.message.includes('重复')) return true;
+            console.error('保存失败:', err);
+            return false;
+        }
+    }
+
+    window.saveExamQToLib = async function(idx) {
+        const q = window._examQuestions[idx];
+        if (!q) return;
+        const btn = document.getElementById('saveQBtn-' + idx);
+        if (btn) { btn.disabled = true; btn.textContent = '保存中...'; }
+        const ok = await _saveQuestionToLib(q);
+        if (ok) {
+            if (btn) {
+                btn.textContent = '已加入';
+                btn.style.color = 'var(--success)';
+                btn.style.borderColor = '#A7F3D0';
+                btn.style.background = 'var(--success-light)';
+            }
+            toast('已加入题库', 'success');
+            loadLibrary();
+        } else {
+            if (btn) { btn.disabled = false; btn.textContent = '加入题库'; }
+            toast('加入失败', 'error');
+        }
+    };
+
+    window.saveAllExamToLib = async function() {
+        const qs = (window._examQuestions || []).filter(q => q.source_type === 'generated');
+        if (qs.length === 0) return;
+        const btn = document.getElementById('saveAllToLibBtn');
+        if (btn) { btn.disabled = true; btn.textContent = '保存中...'; }
+        let success = 0;
+        for (const q of qs) {
+            if (await _saveQuestionToLib(q)) success++;
+        }
+        if (btn) {
+            btn.textContent = `已加入 ${success}/${qs.length}`;
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+        }
+        toast(`已将 ${success} 道题加入题库`, 'success');
+        loadLibrary();
+    };
+
+    /* ============================================================
+       页面5：复习模式 - 对话式
+       ============================================================ */
+    let reviewSessionId = null;
+    let reviewTotal = 0;
+    let reviewIndex = 0;
+    let currentReviewQ = null;
+    let reviewSending = false;
+
+    document.getElementById('startReviewBtn').addEventListener('click', async () => {
+        const count = Number(document.getElementById('reviewCount').value);
+        const loading = document.getElementById('reviewLoading');
+        loading.style.display = 'flex';
+        try {
+            const res = await apiJson('/api/review/start', 'POST', { count });
+            if (res.message && !res.question) {
+                loading.style.display = 'none';
+                toast('题库暂无题目，请先去提取题目或智能出题', 'error');
+                return;
+            }
+            reviewSessionId = res.session_id || res.id;
+            reviewTotal = res.total_count || res.total || count;
+            reviewIndex = res.current_index || 0;
+            document.getElementById('reviewStart').style.display = 'none';
+            document.getElementById('reviewSession').style.display = 'block';
+            loading.style.display = 'none';
+            document.getElementById('reviewChatBox').innerHTML = '';
+            // 第一题作为面试官消息
+            if (res.question) {
+                currentReviewQ = res.question;
+                reviewIndex = 0;
+                appendReviewMsg('interviewer', buildQuestionText(res.question, res.is_weighted));
+                updateReviewProgress(0);
+            }
+        } catch (err) {
+            loading.style.display = 'none';
+            toast('开始复习失败：' + err.message, 'error');
+        }
+    });
+
+    function buildQuestionText(q, isWeighted) {
+        let tags = '';
+        if (q.question_type) tags += `[${typeLabel(q.question_type)}] `;
+        if (q.category) tags += `[${q.category}] `;
+        if (isWeighted) tags += '⚠️重点关注 ';
+        // 纯文本星级（避免 HTML 被 escapeHtml 转义后显示为乱码）
+        const diff = Number(q.difficulty) || 0;
+        let stars = '';
+        for (let i = 1; i <= 5; i++) stars += i <= diff ? '★' : '☆';
+        tags += stars;
+        return tags + '\n' + (q.content || q.question || '');
+    }
+
+    function appendReviewMsg(role, text) {
+        const chatBox = document.getElementById('reviewChatBox');
+        const div = document.createElement('div');
+        div.className = 'chat-msg ' + (role === 'user' ? 'user' : 'interviewer');
+        const avatar = role === 'user' ? '我' : 'AI';
+        div.innerHTML = `<div class="chat-avatar">${avatar}</div><div class="chat-bubble">${escapeHtml(text)}</div>`;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function updateReviewProgress(index) {
+        const progress = reviewTotal > 0 ? ((index + 1) / reviewTotal) * 100 : 0;
+        document.getElementById('reviewProgressBar').style.width = progress + '%';
+        document.getElementById('reviewProgressText').textContent = (index + 1) + ' / ' + reviewTotal;
+    }
+
+    async function sendReviewAnswer() {
+        if (reviewSending) return;
+        const input = document.getElementById('reviewChatInput');
+        const answer = input.value.trim();
+        if (!answer) return;
+        if (!currentReviewQ) { toast('请等待题目加载', 'error'); return; }
+        reviewSending = true;
+        input.value = '';
+        input.style.height = 'auto';
+        appendReviewMsg('user', answer);
+        const sendBtn = document.getElementById('reviewChatSendBtn');
+        sendBtn.disabled = true;
+        sendBtn.textContent = '评估中...';
+        try {
+            const res = await apiJson('/api/review/submit?session_id=' + reviewSessionId, 'POST', {
+                question_id: currentReviewQ.id,
+                user_answer: answer,
+                is_confused: false
+            });
+            // 展示评估反馈
+            const good = res.is_correct || res.score >= 60;
+            let feedbackText = `【评估】${good ? '✓ 回答不错' : '✗ 需要改进'}（得分 ${res.score}）\n`;
+            if (res.feedback) feedbackText += res.feedback + '\n';
+            if (currentReviewQ.answer) feedbackText += '\n【参考答案】\n' + formatAnswer(currentReviewQ.answer);
+            appendReviewMsg('interviewer', feedbackText);
+            // 自动加载下一题
+            await loadNextReview();
+        } catch (err) {
+            appendReviewMsg('interviewer', '评估失败：' + err.message);
+        } finally {
+            reviewSending = false;
+            sendBtn.disabled = false;
+            sendBtn.textContent = '发送';
+        }
+    }
+    window.sendReviewAnswer = sendReviewAnswer;
+
+    async function loadNextReview() {
+        try {
+            const res = await api('/api/review/next?session_id=' + reviewSessionId);
+            if (res.message === 'Review completed' || (!res.question && !res.id)) {
+                finishReview();
+                return;
+            }
+            const q = res.question || res;
+            currentReviewQ = q;
+            reviewIndex = res.current_index !== undefined ? res.current_index : (reviewIndex + 1);
+            updateReviewProgress(reviewIndex);
+            // 短暂延迟后出下一题
+            setTimeout(() => appendReviewMsg('interviewer', buildQuestionText(q, res.is_weighted)), 500);
+        } catch (err) {
+            toast('加载下一题失败：' + err.message, 'error');
+        }
+    }
+
+    document.getElementById('reviewChatSendBtn').addEventListener('click', sendReviewAnswer);
+    document.getElementById('reviewChatInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendReviewAnswer();
+        }
+    });
+    document.getElementById('reviewChatInput').addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    document.getElementById('endReviewBtn').addEventListener('click', () => {
+        if (!confirm('确定结束本次复习？')) return;
+        finishReview();
+    });
+
+    function finishReview() {
+        const chatBox = document.getElementById('reviewChatBox');
+        const div = document.createElement('div');
+        div.className = 'chat-msg interviewer';
+        div.innerHTML = `<div class="chat-avatar">AI</div><div class="chat-bubble">🎉 复习完成！本次共复习 ${reviewTotal} 道题目。<br><button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="resetReview()">再来一轮</button></div>`;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        document.getElementById('reviewProgressBar').style.width = '100%';
+        document.getElementById('reviewProgressText').textContent = reviewTotal + ' / ' + reviewTotal;
+        document.getElementById('reviewChatInput').disabled = true;
+        document.getElementById('reviewChatSendBtn').disabled = true;
+    }
+
+    window.resetReview = function() {
+        reviewSessionId = null;
+        reviewIndex = 0;
+        currentReviewQ = null;
+        document.getElementById('reviewStart').style.display = 'block';
+        document.getElementById('reviewSession').style.display = 'none';
+        document.getElementById('reviewChatInput').disabled = false;
+        document.getElementById('reviewChatSendBtn').disabled = false;
+    };
+
+    /* ============================================================
+       页面6：模拟面试 - 对话式面试官
+       ============================================================ */
+    let currentInterviewId = null;
+    let interviewSending = false;
+
+    async function initInterviewPage() {
+        // 加载项目选项
+        try {
+            const projects = await api('/api/projects');
+            const sel = document.getElementById('interviewProject');
+            sel.innerHTML = '<option value="">通用后端面试</option>';
+            projects.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.name;
+                sel.appendChild(opt);
+            });
+        } catch (e) { /* ignore */ }
+
+        // 默认显示开始卡片，隐藏对话区
+        showInterviewStartView();
+        // 加载历史会话列表
+        await loadInterviewSessions();
+    }
+
+    function showInterviewStartView() {
+        document.getElementById('interviewStartCard').style.display = 'block';
+        document.getElementById('interviewChatArea').style.display = 'none';
+        document.getElementById('chatInput').disabled = false;
+        document.getElementById('chatSendBtn').disabled = false;
+    }
+
+    function showInterviewChatView() {
+        document.getElementById('interviewStartCard').style.display = 'none';
+        document.getElementById('interviewChatArea').style.display = 'flex';
+        document.getElementById('endInterviewBtn').style.display = 'inline-flex';
+        document.getElementById('extractInterviewBtn').style.display = 'none';
+        document.getElementById('extractInterviewBtn').disabled = false;
+        document.getElementById('extractInterviewBtn').style.opacity = '1';
+    }
+
+    async function loadInterviewSessions() {
+        const listEl = document.getElementById('interviewSessionList');
+        if (!listEl) return;
+        try {
+            const sessions = await api('/api/interview/sessions');
+            if (!sessions.length) {
+                listEl.innerHTML = '<div style="font-size:12px; color:var(--text-tertiary); padding:12px; text-align:center;">暂无历史会话</div>';
+                return;
+            }
+            listEl.innerHTML = sessions.map(s => {
+                const isActive = s.id === currentInterviewId;
+                const statusCls = s.status === 'ended' ? 'ended' : '';
+                const statusText = s.status === 'ended' ? '已结束' : '进行中';
+                const name = s.project_name ? s.project_name : '通用面试';
+                const last = s.last_message ? (s.last_message.length > 30 ? s.last_message.slice(0, 30) + '...' : s.last_message) : '暂无消息';
+                return `
+                <div class="interview-session-item ${isActive ? 'active' : ''}" onclick="openInterview(${s.id})">
+                    <div class="sess-name">${escapeHtml(name)}</div>
+                    <div class="sess-meta">
+                        <span class="sess-status ${statusCls}">${statusText}</span>
+                        <span>${s.message_count} 条</span>
+                        <span class="sess-del" onclick="deleteInterview(${s.id}, event)" title="删除">删除</span>
+                    </div>
+                    <div style="font-size:11px; color:var(--text-tertiary); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(last)}</div>
+                </div>`;
+            }).join('');
+        } catch (e) {
+            listEl.innerHTML = '<div style="font-size:12px; color:var(--text-tertiary); padding:12px;">加载失败</div>';
+        }
+    }
+
+    document.getElementById('startInterviewBtn').addEventListener('click', async () => {
+        const pid = document.getElementById('interviewProject').value;
+        const position = document.getElementById('interviewPosition').value;
+        const btn = document.getElementById('startInterviewBtn');
+        btn.disabled = true;
+        btn.textContent = '面试官准备中...';
+        try {
+            const body = { position };
+            if (pid) body.project_id = Number(pid);
+            const res = await apiJson('/api/interview/start', 'POST', body);
+            currentInterviewId = res.session_id;
+            // 切换到对话区
+            showInterviewChatView();
+            // 设置标题
+            const pname = document.getElementById('interviewProject').selectedOptions[0].textContent;
+            document.getElementById('interviewTitle').textContent = pname + ' · ' + position;
+            document.getElementById('interviewSub').textContent = '面试进行中';
+            // 清空聊天框并显示首问
+            const chatBox = document.getElementById('chatBox');
+            chatBox.innerHTML = '';
+            appendChatMsg('interviewer', res.content);
+            await loadInterviewSessions();
+            document.getElementById('chatInput').focus();
+        } catch (err) {
+            toast('开启面试失败：' + err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '开始面试';
+        }
+    });
+
+    document.getElementById('newInterviewBtn').addEventListener('click', () => {
+        currentInterviewId = null;
+        showInterviewStartView();
+        loadInterviewSessions();
+    });
+
+    document.getElementById('backToStartBtn').addEventListener('click', () => {
+        currentInterviewId = null;
+        showInterviewStartView();
+        loadInterviewSessions();
+    });
+
+    document.getElementById('endInterviewBtn').addEventListener('click', async () => {
+        if (!currentInterviewId) return;
+        if (!confirm('确定结束本次面试？结束后将不能继续对话。')) return;
+        try {
+            await api('/api/interview/' + currentInterviewId + '/end', { method: 'POST' });
+            document.getElementById('interviewSub').textContent = '面试已结束';
+            document.getElementById('chatInput').disabled = true;
+            document.getElementById('chatSendBtn').disabled = true;
+            document.getElementById('endInterviewBtn').style.display = 'none';
+            document.getElementById('extractInterviewBtn').style.display = 'inline-flex';
+            await loadInterviewSessions();
+            toast('面试已结束', 'success');
+        } catch (err) {
+            toast('结束失败：' + err.message, 'error');
+        }
+    });
+
+    document.getElementById('extractInterviewBtn').addEventListener('click', async () => {
+        if (!currentInterviewId) return;
+        const btn = document.getElementById('extractInterviewBtn');
+        btn.disabled = true;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span>提取中...</span>';
+        try {
+            const res = await apiJson('/api/interview/' + currentInterviewId + '/extract', 'POST');
+            toast(`已提取 ${res.added} 道题到题库${res.skipped ? '（跳过 ' + res.skipped + ' 道重复）' : ''}`, 'success');
+            btn.innerHTML = `<span>已提取 ${res.added} 道</span>`;
+            btn.style.opacity = '0.7';
+            loadLibrary();
+        } catch (err) {
+            toast('提取失败：' + err.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    });
+
+    // 发送消息
+    async function sendChatMessage() {
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text || interviewSending) return;
+        if (!currentInterviewId) {
+            toast('请先开始面试', 'error');
+            return;
+        }
+        interviewSending = true;
+        const sendBtn = document.getElementById('chatSendBtn');
+        sendBtn.disabled = true;
+        input.value = '';
+        input.style.height = 'auto';
+
+        // 显示候选人消息
+        appendChatMsg('candidate', text);
+        // 显示 typing
+        const typingEl = appendTyping();
+
+        try {
+            const res = await apiJson('/api/interview/' + currentInterviewId + '/chat', 'POST', { message: text });
+            typingEl.remove();
+            appendChatMsg('interviewer', res.content);
+            if (res.should_end) {
+                document.getElementById('interviewSub').textContent = '面试已结束';
+                document.getElementById('chatInput').disabled = true;
+                sendBtn.disabled = true;
+                document.getElementById('endInterviewBtn').style.display = 'none';
+                document.getElementById('extractInterviewBtn').style.display = 'inline-flex';
+                toast('面试官已结束本次面试', 'info');
+            }
+            await loadInterviewSessions();
+        } catch (err) {
+            typingEl.remove();
+            toast('发送失败：' + err.message, 'error');
+        } finally {
+            interviewSending = false;
+            sendBtn.disabled = false;
+            document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+        }
+    }
+
+    document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
+    document.getElementById('chatInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendChatMessage();
+        }
+    });
+    // 输入框自适应高度
+    document.getElementById('chatInput').addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    function appendChatMsg(role, content) {
+        const chatBox = document.getElementById('chatBox');
+        const avatar = role === 'interviewer' ? '官' : '我';
+        const name = role === 'interviewer' ? '面试官' : '我';
+        const div = document.createElement('div');
+        div.className = 'chat-msg ' + role;
+        div.innerHTML = `
+            <div class="chat-avatar">${avatar}</div>
+            <div>
+                <div class="chat-bubble">${escapeHtml(content)}</div>
+                <div class="chat-meta">${name}</div>
+            </div>
+        `;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return div;
+    }
+
+    function appendTyping() {
+        const chatBox = document.getElementById('chatBox');
+        const div = document.createElement('div');
+        div.className = 'chat-typing';
+        div.innerHTML = '<span></span><span></span><span></span>';
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return div;
+    }
+
+    window.openInterview = async function(id) {
+        currentInterviewId = id;
+        showInterviewChatView();
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML = '<div class="interview-empty">加载历史消息...</div>';
+        try {
+            const sessions = await api('/api/interview/sessions');
+            const s = sessions.find(x => x.id === id);
+            if (s) {
+                const name = s.project_name ? s.project_name : '通用面试';
+                document.getElementById('interviewTitle').textContent = name + ' · ' + (s.position || '后端开发');
+                document.getElementById('interviewSub').textContent = s.status === 'ended' ? '面试已结束' : '面试进行中';
+                const ended = s.status === 'ended';
+                document.getElementById('chatInput').disabled = ended;
+                document.getElementById('chatSendBtn').disabled = ended;
+            }
+            const msgs = await api('/api/interview/' + id + '/history');
+            chatBox.innerHTML = '';
+            if (!msgs.length) {
+                chatBox.innerHTML = '<div class="interview-empty">暂无消息</div>';
+            } else {
+                msgs.forEach(m => appendChatMsg(m.role, m.content));
+            }
+            await loadInterviewSessions();
+        } catch (err) {
+            chatBox.innerHTML = '<div class="interview-empty">加载失败：' + escapeHtml(err.message) + '</div>';
+        }
+    };
+
+    window.deleteInterview = async function(id, e) {
+        if (e) e.stopPropagation();
+        if (!confirm('确定删除该面试会话？')) return;
+        try {
+            await api('/api/interview/' + id, { method: 'DELETE' });
+            if (id === currentInterviewId) {
+                currentInterviewId = null;
+                showInterviewStartView();
+            }
+            await loadInterviewSessions();
+            toast('已删除', 'success');
+        } catch (err) {
+            toast('删除失败：' + err.message, 'error');
+        }
+    };
+
+    /* ============================================================
+       初始化
+       ============================================================ */
+    (async function init() {
+        // 取消登录模式：直接进入应用，无需认证
+        localStorage.setItem('gt_user', '111');
+        showApp();
+    })();
+    </script>
+</body>
+</html>
