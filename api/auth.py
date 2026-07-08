@@ -15,7 +15,12 @@ from db.database import get_db
 
 load_dotenv()
 
-SECRET_KEY = os.getenv("SECRET_KEY", "gt_agent_secret_key")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY 未设置！请在 .env 文件中配置 SECRET_KEY。\n"
+        "生成随机密钥：python -c \"import secrets; print(secrets.token_hex(32))\""
+    )
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
@@ -116,8 +121,8 @@ async def get_current_user(
         except JWTError:
             pass  # token 无效，走下面的预设用户兜底
 
-    # 无 token 或 token 无效：返回预设用户（默认 111）
-    preset_user = os.getenv("PRESET_USER", "111")
+    # 无 token 或 token 无效：返回预设用户
+    preset_user = os.getenv("PRESET_USER") or "111"
     user = get_user(db, preset_user)
     if user is None:
         # 极端情况：预设用户不存在，取第一个用户

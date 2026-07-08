@@ -43,8 +43,8 @@ def init_preset_account():
     预设用户名/密码由环境变量控制（PRESET_USER / PRESET_PASSWORD），
     默认 111/111 仅在非公开模式使用；公开模式下若未设置环境变量则不创建弱密码账号。
     """
-    preset_user = os.getenv("PRESET_USER", "111")
-    preset_pwd = os.getenv("PRESET_PASSWORD", "111" if not PUBLIC_MODE else "")
+    preset_user = os.getenv("PRESET_USER") or "111"
+    preset_pwd = os.getenv("PRESET_PASSWORD") or ("" if PUBLIC_MODE else "111")
     if not preset_pwd:
         # 公开模式且未配置密码 -> 跳过创建，避免弱密码暴露
         return

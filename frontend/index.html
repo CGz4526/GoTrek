@@ -1218,11 +1218,11 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label class="form-label">用户名</label>
-                    <input type="text" class="form-input" id="loginUsername" required placeholder="111">
+                    <input type="text" class="form-input" id="loginUsername" required placeholder="用户名">
                 </div>
                 <div class="form-group">
                     <label class="form-label">密码</label>
-                    <input type="password" class="form-input" id="loginPassword" required placeholder="111">
+                    <input type="password" class="form-input" id="loginPassword" required placeholder="密码">
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">登 录</button>
             </form>
@@ -3302,7 +3302,7 @@
        ============================================================ */
     (async function init() {
         // 取消登录模式：直接进入应用，无需认证
-        localStorage.setItem('gt_user', '111');
+        localStorage.setItem('gt_user', 'default');
         showApp();
     })();
     </script>

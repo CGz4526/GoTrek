@@ -31,7 +31,7 @@ pip install -r requirements.txt
 
 ```env
 DATABASE_URL=sqlite:///./gt_agent.db      # 数据库文件（不要改）
-SECRET_KEY=eb7ae4ad...                    # JWT 密钥（勿泄露）
+SECRET_KEY=<你的密钥>                   # JWT 密钥（勿泄露）
 DEEPSEEK_API_KEY=sk-xxx                   # DeepSeek API Key
 
 PUBLIC_MODE=true                          # true=公开模式（内网穿透/公网）；false=本地模式
@@ -40,7 +40,7 @@ LOGIN_LIMIT=5                             # 登录失败次数上限
 LOGIN_WINDOW=300                          # 限流窗口（秒）
 
 PRESET_USER=111                           # 预设账号
-PRESET_PASSWORD=Gt@2026#Interview         # 预设账号密码
+PRESET_PASSWORD=<你的强密码>               # 预设账号密码
 ```
 
 ### 两种使用模式
@@ -80,7 +80,7 @@ INFO:     Application startup complete.
 ### 登录账号
 
 - **本地模式**：`111` / `111`
-- **公开模式**：`111` / `Gt@2026#Interview`
+- **公开模式**：`你设置的 PRESET_USER` / `你设置的 PRESET_PASSWORD`
 
 ### 停止服务
 
@@ -198,7 +198,7 @@ pip install -r requirements.txt
 ### 前端能打开但登录失败
 
 - 检查 `.env` 里的 `PRESET_PASSWORD` 是否是你用的密码
-- 公开模式下默认密码已从 `111` 升级为 `Gt@2026#Interview`
+- 公开模式下默认密码应替换为环境变量中设置的强密码
 - 5 次失败会被锁定 5 分钟
 
 ### LLM 功能（出题/面试/答案）不工作
@@ -252,7 +252,7 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8000
 
 # 浏览器打开：
 # http://localhost:8000
-# 账号 111 / Gt@2026#Interview（公开模式）
+# 账号 见 .env 中的 PRESET_USER / PRESET_PASSWORD（公开模式）
 # 账号 111 / 111（本地模式）
 
 # 停止：Ctrl+C
