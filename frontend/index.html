@@ -849,6 +849,14 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            max-height: 22px;
+            transition: all 0.2s ease;
+        }
+        .q-row.expanded .q-row-content {
+            white-space: pre-wrap;
+            text-overflow: unset;
+            max-height: none;
+            padding-bottom: 6px;
         }
         .q-row-meta {
             display: flex;
