@@ -419,6 +419,18 @@ def delete_question(question_id: int, db: Session = Depends(get_db), current_use
             detail="Question not found"
         )
     
+    db.query(QuestionWeight).filter(
+        QuestionWeight.question_id == question_id
+    ).delete()
+    
+    db.query(QuestionProject).filter(
+        QuestionProject.question_id == question_id
+    ).delete()
+    
+    db.query(AnswerRecord).filter(
+        AnswerRecord.question_id == question_id
+    ).delete()
+    
     db.delete(question)
     db.commit()
     

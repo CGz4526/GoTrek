@@ -52,9 +52,9 @@ class Question(Base):
 
     uploader = relationship("User", back_populates="questions")
     original_project = relationship("Project")
-    adaptations = relationship("QuestionProject", back_populates="question")
-    weights = relationship("QuestionWeight", back_populates="question")
-    answer_records = relationship("AnswerRecord", back_populates="question")
+    adaptations = relationship("QuestionProject", back_populates="question", cascade="all, delete-orphan")
+    weights = relationship("QuestionWeight", back_populates="question", cascade="all, delete-orphan")
+    answer_records = relationship("AnswerRecord", back_populates="question", cascade="all, delete-orphan")
 
 
 class InterviewSession(Base):
