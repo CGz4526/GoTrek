@@ -428,6 +428,7 @@
         .tag.tag-project { background: var(--accent-light); color: var(--accent-text); border-color: #C7D2FE; }
         .tag.tag-algorithm { background: var(--success-light); color: #047857; border-color: #A7F3D0; }
         .tag.tag-confused { background: var(--warning-light); color: var(--warning); border-color: #FCD34D; }
+        .tag.tag-vague { background: #EDE9FE; color: #6D28D9; border-color: #C4B5FD; }
         .tag.tag-answer { background: var(--accent); color: #FFFFFF; border-color: var(--accent); }
         .tag.tag-generated { background: #EFF6FF; color: #2563EB; border-color: #BFDBFE; }
         .tag.tag-library { background: var(--surface-muted); color: var(--text-secondary); }
@@ -825,6 +826,7 @@
         .q-row:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
         .q-row.is-starred { border-left: 3px solid var(--warning); }
         .q-row.is-confused { border-left: 3px solid var(--warning); background: var(--warning-light); }
+        .q-row.is-vague { border-left: 3px solid #6D28D9; background: #EDE9FE; }
         .q-row.expanded { border-color: var(--accent); box-shadow: 0 2px 8px rgba(79,70,229,0.08); }
 
         .q-row-head {
@@ -1345,10 +1347,13 @@
                                 <div style="font-size:14px; font-weight:600; color:var(--text-primary);">解题助手</div>
                                 <div style="font-size:11px; color:var(--text-tertiary); margin-top:2px;">提问后自动整理为标准题并存入题库（高权重）</div>
                             </div>
-                            <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-secondary); cursor:pointer;">
-                                <input type="checkbox" id="autoSaveSolve" checked>
-                                自动入库
-                            </label>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <button class="btn btn-ghost btn-sm" onclick="clearSolveHistory()" style="padding:4px 10px; font-size:11px;">清空历史</button>
+                                <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-secondary); cursor:pointer;">
+                                    <input type="checkbox" id="autoSaveSolve" checked>
+                                    自动入库
+                                </label>
+                            </div>
                         </div>
                         <div class="chat-box" id="solveChatBox" style="flex:1; padding:16px;">
                             <div style="text-align:center; color:var(--text-tertiary); font-size:12px; padding:30px 0;">
@@ -2047,13 +2052,46 @@
             solveBtn.classList.add('active');
             batchPane.style.display = 'none';
             solvePane.style.display = 'block';
+            const chatBox = document.getElementById('solveChatBox');
+            if (chatBox && chatBox.children.length <= 1) {
+                loadSolveHistory();
+            }
         }
     };
 
     // 解题助手对话逻辑
     let solveSending = false;
+    const SOLVE_HISTORY_KEY = 'gt_agent_solve_history';
 
-    function appendSolveMsg(role, text, meta) {
+    function saveSolveMessage(role, text, meta) {
+        try {
+            const history = JSON.parse(localStorage.getItem(SOLVE_HISTORY_KEY) || '[]');
+            history.push({ role, text, meta, time: Date.now() });
+            if (history.length > 50) history.shift();
+            localStorage.setItem(SOLVE_HISTORY_KEY, JSON.stringify(history));
+        } catch(e) {}
+    }
+
+    function loadSolveHistory() {
+        try {
+            const history = JSON.parse(localStorage.getItem(SOLVE_HISTORY_KEY) || '[]');
+            if (history.length === 0) return;
+            history.forEach(msg => {
+                appendSolveMsg(msg.role, msg.text, msg.meta, true);
+            });
+        } catch(e) {}
+    }
+
+    function clearSolveHistory() {
+        localStorage.removeItem(SOLVE_HISTORY_KEY);
+        const chatBox = document.getElementById('solveChatBox');
+        chatBox.innerHTML = `<div style="text-align:center; color:var(--text-secondary); padding:40px 20px;">
+            <div style="font-size:48px; margin-bottom:12px;">💡</div>
+            <div style="font-size:14px;">有问题就问我，我来帮你解答并整理入库</div>
+        </div>`;
+    }
+
+    function appendSolveMsg(role, text, meta, skipSave) {
         const chatBox = document.getElementById('solveChatBox');
         // 清掉欢迎语
         const welcome = chatBox.querySelector('div[style*="text-align:center"]');
@@ -2066,6 +2104,7 @@
         div.innerHTML = `<div class="chat-avatar">${avatar}</div><div><div class="chat-bubble">${escapeHtml(formatAnswer(text))}</div>${metaHtml}</div>`;
         chatBox.appendChild(div);
         chatBox.scrollTop = chatBox.scrollHeight;
+        if (!skipSave) saveSolveMessage(role, text, meta);
         return div;
     }
 
@@ -2351,6 +2390,9 @@
         const filtered = getFilteredQuestions();
         // 前端再保险一次：星标置顶
         filtered.sort((a, b) => {
+            const va = a.vague_count || 0;
+            const vb = b.vague_count || 0;
+            if (va !== vb) return vb - va;
             const sa = a.starred ? 1 : 0;
             const sb = b.starred ? 1 : 0;
             if (sa !== sb) return sb - sa;
@@ -2369,10 +2411,13 @@
             const answer = q.answer || '';
             const hasAnswer = answer.length > 0;
             const isStarred = !!q.starred;
+            const vagueCount = q.vague_count || 0;
+            const isVague = vagueCount > 0;
             const rowClass = [
                 'q-row',
                 isStarred ? 'is-starred' : '',
-                isConfused ? 'is-confused' : ''
+                isConfused ? 'is-confused' : '',
+                isVague ? 'is-vague' : ''
             ].filter(Boolean).join(' ');
             return `
             <div class="${rowClass}" data-qid="${q.id}">
@@ -2381,6 +2426,7 @@
                         ${q.question_type ? `<span class="tag ${typeTagClass(q.question_type)}">${typeLabel(q.question_type)}</span>` : ''}
                         ${q.category ? `<span class="tag">${escapeHtml(q.category)}</span>` : ''}
                         ${isConfused ? '<span class="tag tag-confused">困惑</span>' : ''}
+                        ${isVague ? `<span class="tag tag-vague">模糊${vagueCount > 1 ? ' ×' + vagueCount : ''}</span>` : ''}
                     </div>
                     <div class="q-row-content">${escapeHtml(q.content || q.question || '')}</div>
                     <div class="q-row-meta">
@@ -2398,6 +2444,10 @@
                         <button class="icon-btn star-btn ${isStarred ? 'starred' : ''}" onclick="toggleStar(${q.id})">
                             <svg viewBox="0 0 24 24" fill="${isStarred ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                             ${isStarred ? '已星标' : '星标'}
+                        </button>
+                        <button class="icon-btn" onclick="markVague(${q.id})">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8.5 9a3.5 3.5 0 1 1 7 0c0 2-2.5 2.5-3.5 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            模糊${vagueCount > 0 ? '(' + vagueCount + ')' : ''}
                         </button>
                         <button class="icon-btn" onclick="markConfused(${q.id})">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -2465,6 +2515,20 @@
             const q = allQuestions.find(x => x.id === id);
             if (q) q.is_confused = !q.is_confused;
             toast('已标记为困惑题目', 'success');
+            renderQuestions();
+        } catch (err) {
+            toast('标记失败：' + err.message, 'error');
+        }
+    };
+
+    window.markVague = async function(id) {
+        try {
+            const res = await api('/api/questions/' + id + '/mark-vague', { method: 'POST' });
+            const q = allQuestions.find(x => x.id === id);
+            if (q) {
+                q.vague_count = res.vague_count || (q.vague_count || 0) + 1;
+            }
+            toast('已标记模糊，权重+5', 'success');
             renderQuestions();
         } catch (err) {
             toast('标记失败：' + err.message, 'error');

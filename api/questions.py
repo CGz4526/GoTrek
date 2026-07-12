@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File,
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 
-from db.models import Question, User
+from db.models import Question, User, QuestionWeight
 from db.schemas import QuestionResponse, QuestionUpload, QuestionMarkConfused, QuestionCreate
 from db.database import get_db
 from api.auth import get_current_user
 from core.parser import parse_interview_text
-from core.weight_manager import mark_question_confused, get_question_weight
+from core.weight_manager import mark_question_confused, get_question_weight, mark_question_vague, get_question_vague_count
 
 router = APIRouter(prefix="/api/questions", tags=["questions"])
 
@@ -229,7 +229,6 @@ def get_questions(
     if difficulty:
         query = query.filter(Question.difficulty == difficulty)
 
-    # 星标置顶，同组内按创建时间倒序
     questions = query.order_by(
         Question.starred.desc(),
         Question.created_at.desc()
@@ -238,6 +237,7 @@ def get_questions(
     response = []
     for q in questions:
         weight = get_question_weight(current_user.id, q.id, db)
+        vague_count = get_question_vague_count(current_user.id, q.id, db)
         response.append(QuestionResponse(
             id=q.id,
             content=q.content,
@@ -248,8 +248,11 @@ def get_questions(
             difficulty=q.difficulty,
             starred=bool(q.starred),
             created_at=q.created_at,
-            weight=weight
+            weight=weight,
+            vague_count=vague_count
         ))
+
+    response.sort(key=lambda x: (-x.vague_count, -x.starred, x.created_at), reverse=False)
 
     return response
 
@@ -299,6 +302,31 @@ def mark_confused(question_id: int, db: Session = Depends(get_db), current_user:
     mark_question_confused(current_user.id, question_id, db)
 
     return {"message": "Question marked as confused", "question_id": question_id}
+
+
+@router.post("/{question_id}/mark-vague")
+def mark_vague(question_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """标记为模糊题目。每次点击模糊次数+1，权重+5。
+    模糊次数越多排序越靠前。"""
+    question = db.query(Question).filter(
+        Question.id == question_id,
+        Question.user_id == current_user.id
+    ).first()
+
+    if not question:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Question not found"
+        )
+
+    mark_question_vague(current_user.id, question_id, db)
+    vague_count = get_question_vague_count(current_user.id, question_id, db)
+
+    return {
+        "message": "Question marked as vague",
+        "question_id": question_id,
+        "vague_count": vague_count
+    }
 
 
 @router.post("/{question_id}/star")

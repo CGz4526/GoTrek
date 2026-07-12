@@ -119,6 +119,7 @@ class QuestionWeight(Base):
     question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
     weight = Column(Integer, default=0)
     confused_count = Column(Integer, default=0)
+    vague_count = Column(Integer, default=0)
     last_review_time = Column(DateTime)
     review_count = Column(Integer, default=0)
 

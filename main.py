@@ -33,6 +33,12 @@ def _migrate_db():
             with engine.connect() as conn:
                 conn.execute(text("ALTER TABLE questions ADD COLUMN starred BOOLEAN DEFAULT 0 NOT NULL"))
                 conn.commit()
+    if 'question_weights' in insp.get_table_names():
+        cols = [c['name'] for c in insp.get_columns('question_weights')]
+        if 'vague_count' not in cols:
+            with engine.connect() as conn:
+                conn.execute(text("ALTER TABLE question_weights ADD COLUMN vague_count INTEGER DEFAULT 0 NOT NULL"))
+                conn.commit()
 
 
 _migrate_db()

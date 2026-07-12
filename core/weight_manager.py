@@ -26,6 +26,43 @@ def mark_question_confused(user_id: int, question_id: int, db: Session):
     db.commit()
 
 
+def mark_question_vague(user_id: int, question_id: int, db: Session):
+    """标记为模糊，每次点击模糊次数+1，权重+5。模糊次数越多排序越靠前。"""
+    weight_record = db.query(QuestionWeight).filter(
+        QuestionWeight.user_id == user_id,
+        QuestionWeight.question_id == question_id
+    ).first()
+    
+    if weight_record:
+        weight_record.weight += 5
+        if hasattr(weight_record, 'vague_count') and weight_record.vague_count is not None:
+            weight_record.vague_count += 1
+        else:
+            weight_record.vague_count = 1
+        weight_record.last_review_time = datetime.utcnow()
+    else:
+        weight_record = QuestionWeight(
+            user_id=user_id,
+            question_id=question_id,
+            weight=5,
+            vague_count=1,
+            last_review_time=datetime.utcnow()
+        )
+        db.add(weight_record)
+    
+    db.commit()
+
+
+def get_question_vague_count(user_id: int, question_id: int, db: Session) -> int:
+    weight_record = db.query(QuestionWeight).filter(
+        QuestionWeight.user_id == user_id,
+        QuestionWeight.question_id == question_id
+    ).first()
+    if weight_record and hasattr(weight_record, 'vague_count') and weight_record.vague_count is not None:
+        return weight_record.vague_count
+    return 0
+
+
 def mark_question_reviewed(user_id: int, question_id: int, is_correct: bool, db: Session):
     weight_record = db.query(QuestionWeight).filter(
         QuestionWeight.user_id == user_id,

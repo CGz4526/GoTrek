@@ -70,6 +70,7 @@ class QuestionResponse(BaseModel):
     starred: Optional[bool] = False
     created_at: datetime
     weight: Optional[int] = 0
+    vague_count: Optional[int] = 0
 
     class Config:
         from_attributes = True
