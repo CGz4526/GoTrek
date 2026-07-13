@@ -10,8 +10,9 @@ python-multipart==0.0.6
 requests==2.31.0
 pdfplumber==0.11.0
 jieba==0.42.1
-numpy==1.26.2
-scikit-learn==1.3.2
+numpy>=2.0
+scikit-learn>=1.5,<1.7
 # OCR：PaddleOCR 2.x（CPU 版 paddlepaddle 2.6.2 兼容性最好）
 paddlepaddle==2.6.2
 paddleocr==2.7.3
+opencv-python-headless>=4.6
