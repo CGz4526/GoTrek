@@ -58,13 +58,10 @@ def extract_text_from_image(image_path: str) -> str:
     Returns:
         提取的文字内容，按行拼接
     """
-    try:
-        ocr = _get_ocr()
-        result = ocr.predict(image_path)
-        return _parse_result(result)
-    except Exception as e:
-        print(f"OCR error: {e}")
-        return ""
+    # 不吞异常：让错误冒泡到 API 层，前端能看到具体原因而非模糊的"未识别到文字"
+    ocr = _get_ocr()
+    result = ocr.predict(image_path)
+    return _parse_result(result)
 
 
 def extract_text_from_bytes(image_bytes: bytes) -> str:
